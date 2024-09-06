@@ -28,8 +28,9 @@ public class Attendance {
 
     @ManyToOne
     @JoinColumn(name = "schedule_id")
-    private Schedule scheduleId;
+    private Schedule schedule;
 
     @OneToMany(mappedBy = "attendance")
-    private List<AttendanceDetail> attendanceDetailsId;
+    private List<AttendanceDetail> attendanceDetails;
 }
+

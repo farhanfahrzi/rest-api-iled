@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,25 +22,31 @@ public class Trainer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     @Email
     private String email;
 
-    @Column(name = "birth_date")
+    @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
-    @Column(name = "address")
+    @Column(name = "address", nullable = false)
     private String address;
 
     @OneToOne
     @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount userAccount;
+
+    @OneToMany(mappedBy = "trainer")
+    private List<ProgrammingLanguage> programmingLanguages;
+
+    @OneToMany(mappedBy = "trainer")
+    private List<Schedule> schedules;
 }

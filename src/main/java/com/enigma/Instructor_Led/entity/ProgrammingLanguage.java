@@ -4,6 +4,9 @@ import com.enigma.Instructor_Led.constant.ConstantTable;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,4 +23,11 @@ public class ProgrammingLanguage {
     @Column(name = "programming_language")
     private String programmingLanguage;
 
+    @ManyToOne
+    @JoinColumn(name = "trainer_id") // Column untuk menyimpan reference ke Trainer
+    private Trainer trainer;
+
+    @OneToMany(mappedBy = "programmingLanguage")
+    private List<Trainee> trainees;
 }
+

@@ -25,3 +25,4 @@ public class AttendanceDetail {
     @JoinColumn(name = "trainee_id")
     private Trainee trainee;
 }
+

@@ -1,14 +1,11 @@
 package com.enigma.Instructor_Led.entity;
 
 import com.enigma.Instructor_Led.constant.ConstantTable;
-import com.enigma.Instructor_Led.constant.UserRole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -20,21 +17,21 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "question")
+    @Column(name = "question", nullable = false)
     private String question;
 
     @Column(name = "answer")
     private String answer;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private String status;
 
     @ManyToOne
-    @JoinColumn(name = "trainee_id")
+    @JoinColumn(name = "trainee_id", nullable = false)
     private Trainee trainee;
 
     @ManyToOne
-    @JoinColumn(name = "trainer_id")
-    private Trainer trainer;
-
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
 }
+
