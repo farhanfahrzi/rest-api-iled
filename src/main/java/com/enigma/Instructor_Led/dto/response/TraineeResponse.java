@@ -1,5 +1,6 @@
 package com.enigma.Instructor_Led.dto.response;
 
+import com.enigma.Instructor_Led.constant.TraineeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,11 +14,12 @@ import java.util.Date;
 @Builder
 public class TraineeResponse {
     private String id;
-    private String name;
     private String nik;
+    private String name;
     private Date birthDate;
     private String address;
     private String email;
     private String phoneNumber;
-    private String batch;
+    private String programmingLanguage; // Assuming you need the name or ID of the programming language
+    private TraineeStatus status;
 }

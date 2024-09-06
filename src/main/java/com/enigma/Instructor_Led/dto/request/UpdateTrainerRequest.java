@@ -18,6 +18,10 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class UpdateTrainerRequest {
+
+    @NotBlank
+    private String id;
+
     @NotBlank(message = "Name is required")
     private String name;
 

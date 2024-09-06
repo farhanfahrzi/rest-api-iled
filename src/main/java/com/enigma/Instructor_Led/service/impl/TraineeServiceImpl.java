@@ -1,69 +1,94 @@
 package com.enigma.Instructor_Led.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.enigma.Instructor_Led.constant.TraineeStatus;
 import com.enigma.Instructor_Led.dto.request.CreateTraineeRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateTraineeRequest;
 import com.enigma.Instructor_Led.dto.response.TraineeResponse;
+import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
 import com.enigma.Instructor_Led.entity.Trainee;
+import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.TraineeRepository;
+import com.enigma.Instructor_Led.service.TraineeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TraineeServiceImpl implements TraineeService {
 
-    @Autowired
-    private TraineeRepository traineeRepository;
+    private final TraineeRepository traineeRepository;
+    private final ProgrammingLanguageRepository programmingLanguageRepository;
 
     @Override
     public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
-        Trainee trainee = new Trainee();
-        trainee.setId(createTraineeRequest.getId());
-        trainee.setName(createTraineeRequest.getName());
-        // Set other fields as necessary
-        trainee = traineeRepository.save(trainee);
-        return convertToResponse(trainee);
+        ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
+        Trainee trainee = Trainee.builder()
+                .name(createTraineeRequest.getName())
+                .nik(createTraineeRequest.getNik())
+                .birthDate(createTraineeRequest.getBirthDate())
+                .address(createTraineeRequest.getAddress())
+                .email(createTraineeRequest.getEmail())
+                .phoneNumber(createTraineeRequest.getPhoneNumber())
+                .programmingLanguage(programmingLanguage)
+                .status(TraineeStatus.ACTIVE)
+                .build();
+
+        Trainee savedTrainee = traineeRepository.save(trainee);
+        return mapToResponse(savedTrainee);
     }
 
     @Override
     public TraineeResponse update(UpdateTraineeRequest updateTraineeRequest) {
-        Trainee trainee = traineeRepository.findById(updateTraineeRequest.getId())
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+        Optional<Trainee> traineeOpt = traineeRepository.findById(updateTraineeRequest.getId());
+        if (traineeOpt.isEmpty()) {
+            return null; // Or throw an exception
+        }
+
+        Trainee trainee = traineeOpt.get();
         trainee.setName(updateTraineeRequest.getName());
-        // Update other fields as necessary
-        trainee = traineeRepository.save(trainee);
-        return convertToResponse(trainee);
+        trainee.setNik(updateTraineeRequest.getNik());
+        trainee.setBirthDate(updateTraineeRequest.getBirthDate());
+        trainee.setAddress(updateTraineeRequest.getAddress());
+        trainee.setEmail(updateTraineeRequest.getEmail());
+        trainee.setPhoneNumber(updateTraineeRequest.getPhoneNumber());
+        Trainee updatedTrainee = traineeRepository.save(trainee);
+
+        return mapToResponse(updatedTrainee);
     }
 
     @Override
     public TraineeResponse getById(String id) {
-        Trainee trainee = traineeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
-        return convertToResponse(trainee);
+        Optional<Trainee> traineeOpt = traineeRepository.findById(id);
+        return traineeOpt.map(this::mapToResponse).orElse(null);
     }
 
     @Override
-    public List<TraineeResponse> getAll() {
-        List<Trainee> trainees = traineeRepository.findAll();
-        return trainees.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    public Page<TraineeResponse> getAll(Pageable pageable) {
+        return traineeRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     @Override
     public void delete(String id) {
-        Trainee trainee = traineeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trainee not found"));
-        traineeRepository.delete(trainee);
+        traineeRepository.deleteById(id);
     }
 
-    private TraineeResponse convertToResponse(Trainee trainee) {
-        TraineeResponse response = new TraineeResponse();
-        response.setId(trainee.getId());
-        response.setName(trainee.getName());
-        // Set other fields as necessary
-        return response;
+    private TraineeResponse mapToResponse(Trainee trainee) {
+        return TraineeResponse.builder()
+                .id(trainee.getId())
+                .name(trainee.getName())
+                .nik(trainee.getNik())
+                .birthDate(trainee.getBirthDate())
+                .address(trainee.getAddress())
+                .email(trainee.getEmail())
+                .phoneNumber(trainee.getPhoneNumber())
+                .programmingLanguage(trainee.getProgrammingLanguage().getProgrammingLanguage())
+                .status(trainee.getStatus())
+                .build();
     }
 }

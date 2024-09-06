@@ -21,18 +21,21 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date date;
 
-    @Column(name = "topic")
+    @Column(name = "topic", nullable = false)
     private String topic;
 
     @OneToMany(mappedBy = "schedule")
     private List<DocumentationImage> documentationImages;
 
     @ManyToOne
-    @JoinColumn(name = "trainer_id")
+    @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
+
+    @OneToMany(mappedBy = "schedule")
+    private List<Question> questions;
 }

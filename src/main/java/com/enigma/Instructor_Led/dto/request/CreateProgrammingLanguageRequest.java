@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateProgrammingLanguageRequest {
     @NotBlank(message = "Language is required")
-    private String language;
+    private String programmingLanguage;
 }

@@ -5,55 +5,76 @@ import com.enigma.Instructor_Led.dto.request.UpdateAdminRequest;
 import com.enigma.Instructor_Led.dto.response.AdminResponse;
 import com.enigma.Instructor_Led.entity.Admin;
 import com.enigma.Instructor_Led.repository.AdminRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.enigma.Instructor_Led.service.AdminService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
-    @Autowired
-    private AdminRepository adminRepository;
+    private final AdminRepository adminRepository;
 
     @Override
-    public AdminResponse createAdmin(CreateAdminRequest createAdminRequest) {
-        Admin admin = new Admin();
-        admin.setName(createAdminRequest.getName());
-        admin.setEmail(createAdminRequest.getEmail());
-        admin = adminRepository.save(admin);
-        return new AdminResponse(admin.getId(), admin.getName(), admin.getEmail());
+    public AdminResponse create(CreateAdminRequest createAdminRequest) {
+        Admin admin = Admin.builder()
+                .name(createAdminRequest.getName())
+                .email(createAdminRequest.getEmail())
+                .birthDate(createAdminRequest.getBirthDate())
+                .phoneNumber(createAdminRequest.getPhoneNumber())
+                .address(createAdminRequest.getAddress())
+                .build();
+
+        Admin savedAdmin = adminRepository.save(admin);
+        return mapToResponse(savedAdmin);
+    }
+
+    @Override
+    public AdminResponse update(UpdateAdminRequest updateAdminRequest) {
+        Optional<Admin> adminOpt = adminRepository.findById(updateAdminRequest.getId());
+        if (adminOpt.isEmpty()) {
+            return null;
+        }
+
+        Admin admin = adminOpt.get();
+        admin.setName(updateAdminRequest.getName());
+        admin.setEmail(updateAdminRequest.getEmail());
+        admin.setPhoneNumber(updateAdminRequest.getPhoneNumber());
+        admin.setAddress(updateAdminRequest.getAddress());
+        Admin updatedAdmin = adminRepository.save(admin);
+
+        return mapToResponse(updatedAdmin);
     }
 
     @Override
     public AdminResponse getById(String id) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("Admin not found"));
-        return new AdminResponse(admin.getId(), admin.getName(), admin.getEmail());
+        Optional<Admin> adminOpt = adminRepository.findById(id);
+        return adminOpt.map(this::mapToResponse).orElse(null);
     }
 
     @Override
-    public AdminResponse updateAdmin(UpdateAdminRequest updateAdminRequest) {
-        Admin admin = adminRepository.findById(updateAdminRequest.getId())
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
-        admin.setName(updateAdminRequest.getName());
-        admin.setEmail(updateAdminRequest.getEmail());
-        admin = adminRepository.save(admin);
-        return new AdminResponse(admin.getId(), admin.getName(), admin.getEmail());
+    public Page<AdminResponse> getAll(Pageable pageable) {
+        return adminRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     @Override
-    public List<AdminResponse> getAll() {
-        return adminRepository.findAll().stream()
-                .map(admin -> new AdminResponse(admin.getId(), admin.getName(), admin.getEmail()))
-                .collect(Collectors.toList());
+    public void delete(String id) {
+        adminRepository.deleteById(id);
     }
 
-    @Override
-    public void deleteAdmin(String id) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("Admin not found"));
-        adminRepository.delete(admin);
+    private AdminResponse mapToResponse(Admin admin) {
+        return AdminResponse.builder()
+                .id(admin.getId())
+                .name(admin.getName())
+                .email(admin.getEmail())
+                .birthDate(admin.getBirthDate())
+                .phoneNumber(admin.getPhoneNumber())
+                .address(admin.getAddress())
+                .build();
     }
 }

@@ -21,14 +21,14 @@ public class Admin {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     @Email
     private String email;
 
-    @Column(name = "birth_date")
+    @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
@@ -42,5 +42,4 @@ public class Admin {
     @OneToOne
     @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount userAccount;
-
 }

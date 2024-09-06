@@ -3,13 +3,15 @@ package com.enigma.Instructor_Led.service;
 import com.enigma.Instructor_Led.dto.request.CreateAdminRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateAdminRequest;
 import com.enigma.Instructor_Led.dto.response.AdminResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface AdminService {
-    AdminResponse createAdmin(CreateAdminRequest createAdminRequest);
+    AdminResponse create(CreateAdminRequest createAdminRequest);
     AdminResponse getById(String id);
-    AdminResponse updateAdmin(UpdateAdminRequest updateAdminRequest);
-    List<AdminResponse> getAll();
-    void deleteAdmin(String id);
+    AdminResponse update(UpdateAdminRequest updateAdminRequest);
+    Page<AdminResponse> getAll(Pageable pageable);
+    void delete(String id);
 }

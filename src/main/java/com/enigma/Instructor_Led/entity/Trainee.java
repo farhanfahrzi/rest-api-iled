@@ -1,6 +1,7 @@
 package com.enigma.Instructor_Led.entity;
 
 import com.enigma.Instructor_Led.constant.ConstantTable;
+import com.enigma.Instructor_Led.constant.TraineeStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -21,35 +22,39 @@ public class Trainee {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "nik")
+    @Column(name = "nik", nullable = false, unique = true)
     private String nik;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "birth_date")
+    @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
 
-    @Column(name = "address")
+    @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     @Email
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @ManyToOne
-    @JoinColumn(name = "batch")
-    private Batch batch;
+    @JoinColumn(name = "programming_language_id", nullable = false)
+    private ProgrammingLanguage programmingLanguage;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TraineeStatus status;
 
     @OneToOne
-    @JoinColumn(name = "user_account_id", unique = true)
+    @JoinColumn(name = "user_account_id", unique = true, nullable = true) // Allow null values
     private UserAccount userAccount;
+
+
 }
+
