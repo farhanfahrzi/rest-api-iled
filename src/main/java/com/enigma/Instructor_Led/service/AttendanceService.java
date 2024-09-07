@@ -7,8 +7,7 @@ import java.util.List;
 
 public interface AttendanceService {
     AttendanceResponse create(CreateAttendanceRequest attendanceRequest);
-    AttendanceResponse getById(String id);
-//    AttendanceResponse update(AttendanceRequest attendanceRequest);
+
     List<AttendanceResponse> getAll();
-    void delete(String Id);
+
 }

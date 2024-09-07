@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CreateAttendanceDetailRequest {
-    @NotBlank(message = "Attendance Id is required")
-    private String attendanceId;
+
     @NotBlank(message = "TraineeId is required")
     private String traineeId;
 }

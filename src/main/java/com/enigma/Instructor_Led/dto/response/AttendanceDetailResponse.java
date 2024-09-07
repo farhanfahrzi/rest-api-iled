@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AttendanceDetailResponse {
     private String id;
-    private TraineeResponse trainee;
+    private String traineeId;
 }

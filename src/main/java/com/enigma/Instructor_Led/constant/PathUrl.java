@@ -7,5 +7,7 @@ public class PathUrl {
     public static final String TRAINER = API_V1 + "/trainers";
     public static final String ADMIN = API_V1 + "/admins";
     public static final String TRAINEE = API_V1 + "/trainees";
+    public static final String ATTENDANCE = API_V1 + "/attendances";
+    public static final String SCHEDULE = API_V1 + "/schedules";
 
 }

@@ -9,11 +9,13 @@ import com.enigma.Instructor_Led.entity.Trainee;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.TraineeRepository;
 import com.enigma.Instructor_Led.service.TraineeService;
+import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -24,24 +26,43 @@ public class TraineeServiceImpl implements TraineeService {
 
     private final TraineeRepository traineeRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final Validation validation;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
-        ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
+    public Trainee create(CreateTraineeRequest traineeRequest){
+        validation.validate(traineeRequest);
         Trainee trainee = Trainee.builder()
-                .name(createTraineeRequest.getName())
-                .nik(createTraineeRequest.getNik())
-                .birthDate(createTraineeRequest.getBirthDate())
-                .address(createTraineeRequest.getAddress())
-                .email(createTraineeRequest.getEmail())
-                .phoneNumber(createTraineeRequest.getPhoneNumber())
-                .programmingLanguage(programmingLanguage)
+                .name(traineeRequest.getName())
+                .nik(traineeRequest.getNik())
+                .birthDate(traineeRequest.getBirthDate())
+                .address(traineeRequest.getAddress())
+                .email(traineeRequest.getEmail())
+                .phoneNumber(traineeRequest.getPhoneNumber())
+
                 .status(TraineeStatus.ACTIVE)
                 .build();
-
-        Trainee savedTrainee = traineeRepository.save(trainee);
-        return mapToResponse(savedTrainee);
+        return traineeRepository.saveAndFlush(trainee);
     }
+//    @Override
+//    public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
+//        ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
+//        Trainee trainee = Trainee.builder()
+//                .name(createTraineeRequest.getName())
+//                .nik(createTraineeRequest.getNik())
+//                .birthDate(createTraineeRequest.getBirthDate())
+//                .address(createTraineeRequest.getAddress())
+//                .email(createTraineeRequest.getEmail())
+//                .phoneNumber(createTraineeRequest.getPhoneNumber())
+//                .programmingLanguage(programmingLanguage)
+//                .status(TraineeStatus.ACTIVE)
+//                .build();
+//
+//        Trainee savedTrainee = traineeRepository.save(trainee);
+//        return mapToResponse(savedTrainee);
+//    }
+
+
 
     @Override
     public TraineeResponse update(UpdateTraineeRequest updateTraineeRequest) {
@@ -66,6 +87,11 @@ public class TraineeServiceImpl implements TraineeService {
     public TraineeResponse getById(String id) {
         Optional<Trainee> traineeOpt = traineeRepository.findById(id);
         return traineeOpt.map(this::mapToResponse).orElse(null);
+    }
+
+    @Override
+    public Trainee getOneById(String id) {
+        return traineeRepository.findById(id).orElseThrow(() -> new RuntimeException("Trainee not found"));
     }
 
     @Override

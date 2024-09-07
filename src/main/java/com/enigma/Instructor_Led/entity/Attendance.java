@@ -2,6 +2,7 @@ package com.enigma.Instructor_Led.entity;
 
 import com.enigma.Instructor_Led.constant.ConstantTable;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,7 +22,7 @@ public class Attendance {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "date")
+    @Column(name = "date", updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date date;
@@ -31,6 +32,7 @@ public class Attendance {
     private Schedule schedule;
 
     @OneToMany(mappedBy = "attendance")
+    @JsonManagedReference
     private List<AttendanceDetail> attendanceDetails;
 }
 

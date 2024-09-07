@@ -16,10 +16,9 @@ import java.util.List;
 public class AttendanceResponse {
     private String id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date date;
-
     private ScheduleResponse schedule;
+
+    private Date transDate;
 
     private List<AttendanceDetailResponse> attendanceDetails;
 }

@@ -6,6 +6,7 @@ import com.enigma.Instructor_Led.dto.request.UpdateTraineeRequest;
 import com.enigma.Instructor_Led.dto.response.TraineeResponse;
 import com.enigma.Instructor_Led.dto.response.CommonResponse;
 import com.enigma.Instructor_Led.dto.response.PagingResponse;
+import com.enigma.Instructor_Led.entity.Trainee;
 import com.enigma.Instructor_Led.service.TraineeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,14 +26,16 @@ public class TraineeController {
     private final TraineeService traineeService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<TraineeResponse>> createTrainee(@RequestBody CreateTraineeRequest createTraineeRequest) {
-        TraineeResponse traineeResponse = traineeService.create(createTraineeRequest);
-        CommonResponse<TraineeResponse> response = CommonResponse.<TraineeResponse>builder()
-                .message("Trainee created successfully")
+    public ResponseEntity<CommonResponse<Trainee>> createNewTrainee(@RequestBody CreateTraineeRequest traineeRequest) {
+        Trainee newTrainee = traineeService.create(traineeRequest);
+        CommonResponse<Trainee> commonResponse = CommonResponse.<Trainee>builder()
                 .statusCode(HttpStatus.CREATED.value())
-                .data(traineeResponse)
+                .message("Trainee created successfully")
+                .data(newTrainee)
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(commonResponse);
     }
 
     @PutMapping
