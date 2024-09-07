@@ -2,6 +2,7 @@ package com.enigma.Instructor_Led.service.impl;
 
 import com.enigma.Instructor_Led.entity.AttendanceDetail;
 import com.enigma.Instructor_Led.repository.AttendanceDetailRepository;
+import com.enigma.Instructor_Led.service.AttendanceDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

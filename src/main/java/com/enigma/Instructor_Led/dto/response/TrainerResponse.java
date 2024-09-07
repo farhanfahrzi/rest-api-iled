@@ -1,4 +1,5 @@
 package com.enigma.Instructor_Led.dto.response;
+import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,5 @@ public class TrainerResponse {
     private String phoneNumber;
     private String address;
     private String userAccountId;
-    private List<String> programmingLanguages;
+    private List<ProgrammingLanguage> programmingLanguages;
 }

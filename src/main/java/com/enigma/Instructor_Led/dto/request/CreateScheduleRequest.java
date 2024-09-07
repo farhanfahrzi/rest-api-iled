@@ -1,7 +1,9 @@
 package com.enigma.Instructor_Led.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +17,8 @@ import java.util.Date;
 @Builder
 public class CreateScheduleRequest {
 
-    @NotBlank(message = "Date is required")
+    @NotNull(message = "Date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date;
 
     @NotBlank(message = "Topic is required")
@@ -23,4 +26,7 @@ public class CreateScheduleRequest {
 
     @NotBlank(message = "Trainer is required")
     private String trainerId;
+
+    @NotBlank(message = "Language is required")
+    private String programmingLanguageId;
 }

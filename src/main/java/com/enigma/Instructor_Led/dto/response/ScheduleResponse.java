@@ -18,6 +18,7 @@ public class ScheduleResponse {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date;
     private String topic;
-    private TrainerResponse trainer;
+    private String trainerId;
+    private String programmingLanguageId;
     private List<DocumentationImageResponse> documentationImages;
 }

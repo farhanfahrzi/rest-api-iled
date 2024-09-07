@@ -9,6 +9,7 @@ import com.enigma.Instructor_Led.entity.Trainee;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.TraineeRepository;
 import com.enigma.Instructor_Led.service.TraineeService;
+import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,16 @@ public class TraineeServiceImpl implements TraineeService {
 
     private final TraineeRepository traineeRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final Validation validation;
 
     @Override
     public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
-        ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
+        validation.validate(createTraineeRequest);
+
+        ProgrammingLanguage programmingLanguage = programmingLanguageRepository
+                .findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
+
         Trainee trainee = Trainee.builder()
                 .name(createTraineeRequest.getName())
                 .nik(createTraineeRequest.getNik())
@@ -45,6 +52,8 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public TraineeResponse update(UpdateTraineeRequest updateTraineeRequest) {
+        validation.validate(updateTraineeRequest);
+
         Optional<Trainee> traineeOpt = traineeRepository.findById(updateTraineeRequest.getId());
         if (traineeOpt.isEmpty()) {
             return null; // Or throw an exception
