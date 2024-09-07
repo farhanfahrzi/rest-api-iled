@@ -29,7 +29,7 @@ public class Schedule {
     @Column(name = "topic", nullable = false)
     private String topic;
 
-    @OneToMany(mappedBy = "schedule")
+    @OneToMany(mappedBy = "schedule", fetch = FetchType.EAGER)
     private List<DocumentationImage> documentationImages;
 
     @ManyToOne

@@ -1,4 +1,4 @@
-package com.enigma.Instructor_Led.configuration;
+package com.enigma.Instructor_Led.security;
 
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,10 @@
 package com.enigma.Instructor_Led.service.impl;
 
+import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
+import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.*;
+import com.enigma.Instructor_Led.service.ImageKitService;
 import com.enigma.Instructor_Led.service.ScheduleService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +14,10 @@ import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.*;
 
@@ -22,6 +27,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final TrainerRepository trainerRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final DocumentationImageRepository documentationImageRepository;
 
     private final Validation validation;
 
@@ -74,9 +80,31 @@ public class ScheduleServiceImpl implements ScheduleService {
         return convertToResponse(updatedSchedule);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ScheduleResponse updateDocumentation(UpdateDocumentationImageRequest request) {
+        // Validation
+        validation.validate(request);
+
+        // Find schedule from request
+        DocumentationImage documentationImage = documentationImageRepository.findById(request.getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found")
+        );
+        Schedule schedule = scheduleRepository.findById(request.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+        documentationImage.setSchedule(schedule);
+        List<DocumentationImage> array = new ArrayList<>();
+        array.add(documentationImage);
+        schedule.setDocumentationImages(array);
+
+        // Create response
+        return convertToResponse(schedule);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public Schedule getById(String id) {
+        System.out.println("id inputted: " + id);
         return scheduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
     }

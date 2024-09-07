@@ -17,10 +17,9 @@ public class UpdateDocumentationImageRequest {
     @NotBlank(message = "Schedule id is required")
     private String scheduleId;
 
-//    @NotBlank(message = "Link is required")
-//    private String link;
+    @NotBlank(message = "Link is required")
+    private String link;
 
-//    @NotBlank
-//    @NotNull
-//    private MultipartFile image;
+    @NotBlank
+    private String id;
 }

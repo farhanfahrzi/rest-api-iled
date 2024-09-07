@@ -1,6 +1,7 @@
 package com.enigma.Instructor_Led.controller;
 
 import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
+import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.CommonResponse;
 import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
@@ -52,8 +53,22 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<DocumentationImageResponse> uploadImage(
+    @PutMapping(path = "/docs")
+    public ResponseEntity<CommonResponse<ScheduleResponse>> updateDocumentation(
+            @RequestBody UpdateDocumentationImageRequest request
+    ) {
+        ScheduleResponse schedule = scheduleService.updateDocumentation(request);
+        CommonResponse<ScheduleResponse> response = CommonResponse
+                .<ScheduleResponse>builder()
+                .message("Schedule updated successfully")
+                .statusCode(HttpStatus.OK.value())
+                .data(schedule)
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/docs-upload", consumes = {"multipart/form-data"})
+    public ResponseEntity<CommonResponse<DocumentationImageResponse>> uploadImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam("id") String id
 
@@ -61,8 +76,15 @@ public class ScheduleController {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body(null); // Handle case when the file is empty
         }
-        DocumentationImageResponse imageResponse = imageKitService.uploadImage(file, id);
-        return ResponseEntity.ok(imageResponse);
+        // DocumentationImageResponse imageResponse = imageKitService.uploadImage(file, id);
+        DocumentationImageResponse imageResponse = imageKitService.uploadDocs(file);
+        CommonResponse<DocumentationImageResponse> response = CommonResponse
+                .<DocumentationImageResponse>builder()
+                .message("Documentation uploaded successfully")
+                .statusCode(HttpStatus.OK.value())
+                .data(imageResponse)
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
