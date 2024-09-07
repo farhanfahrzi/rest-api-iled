@@ -12,6 +12,7 @@ import com.enigma.Instructor_Led.service.ScheduleService;
 import com.enigma.Instructor_Led.service.TrainerService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
@@ -21,9 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.sql.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,30 +116,31 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public DocumentationImageResponse updateDocumentation(MultipartFile file, UpdateDocumentationImageRequest request) {
-        System.out.println("id : " + request.getScheduleId());
-        System.out.println("name : " + file.getName());
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is required");
-        }
-
-        // Cari schedule berdasarkan scheduleId
-        Schedule schedule = getOneById(request.getScheduleId());
-        System.out.println("schedule id : " + schedule.getId());
-
-        // Upload file ke ImageKit
-        String imageUrl = imageKitService.uploadFileToImageKit(file);
-        System.out.println("image url : " + imageUrl);
-
-        // Simpan DocumentationImage baru
-        DocumentationImage documentationImage = DocumentationImage.builder()
-                .link(imageUrl)
-                .schedule(schedule)
-                .build();
-        documentationImageRepository.save(documentationImage);
-        System.out.println("documentation id : " + documentationImage.getId());
-
-        // Return response
-        return new DocumentationImageResponse(documentationImage.getId(), documentationImage.getLink());
+//        System.out.println("id : " + request.getScheduleId());
+//        System.out.println("name : " + file.getName());
+//        if (file.isEmpty()) {
+//            throw new IllegalArgumentException("File is required");
+//        }
+//
+//        // Cari schedule berdasarkan scheduleId
+//        Schedule schedule = getOneById(request.getScheduleId());
+//        System.out.println("schedule id : " + schedule.getId());
+//
+//        // Upload file ke ImageKit
+//        String imageUrl = imageKitService.uploadFileToImageKit(file);
+//        System.out.println("image url : " + imageUrl);
+//
+//        // Simpan DocumentationImage baru
+//        DocumentationImage documentationImage = DocumentationImage.builder()
+//                .link(imageUrl)
+//                .schedule(schedule)
+//                .build();
+//        documentationImageRepository.save(documentationImage);
+//        System.out.println("documentation id : " + documentationImage.getId());
+//
+//        // Return response
+//        return new DocumentationImageResponse(documentationImage.getId(), documentationImage.getLink());
+        return null;
     }
 
     @Override
@@ -151,11 +153,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Transactional(readOnly = true)
     @Override
     public Schedule getOneById(String id) {
-        try {
-            return scheduleRepository.findByScheduleId(id);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Schedule not found", e);
-        }
+//        try {
+//            return scheduleRepository.findByScheduleId(id);
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException("Schedule not found", e);
+//        }
+        Optional<Schedule> schedule = scheduleRepository.findById(id);
+        System.out.println(schedule.isPresent());
+        return schedule.orElseThrow(() -> new RuntimeException("Schedule not found"));
     }
 
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package com.enigma.Instructor_Led.repository;
 
 import com.enigma.Instructor_Led.entity.Schedule;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,13 +9,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     List<Schedule> findAllByTrainerId(String id);
 
+    @NotNull
+    @Override
     @Query(value = "SELECT s.* from t_schedule s WHERE s.id = :id", nativeQuery = true)
-    Schedule findByScheduleId(String id);
+    Optional<Schedule> findById(@NotNull String id);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
             "ON s.programming_language_id = pl.id WHERE s.date BETWEEN :startDate AND :endDate " +

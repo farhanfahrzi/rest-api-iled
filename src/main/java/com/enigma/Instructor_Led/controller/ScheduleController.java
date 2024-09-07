@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -52,48 +53,22 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping (path = "/docs", consumes = {"multipart/form-data"})
-    public ResponseEntity<CommonResponse<DocumentationImageResponse>> updateDocumentation(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("data") UpdateDocumentationImageRequest request
-    ) {
-//        // Validation
-//        if (file.isEmpty()) {
-//            return ResponseEntity.badRequest().body(
-//                    CommonResponse.<DocumentationImageResponse>builder()
-//                            .message("File is required")
-//                            .statusCode(HttpStatus.BAD_REQUEST.value())
-//                            .build()
-//            );
-//        }
-
-        System.out.println("file : " + file.getOriginalFilename());
-
-        DocumentationImageResponse documentation = scheduleService.updateDocumentation(file, request);
-        CommonResponse<DocumentationImageResponse> response = CommonResponse
-                .<DocumentationImageResponse>builder()
-                .message("Document updated successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(documentation)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-//    @PostMapping (path = "/docs")
+//    @PostMapping (path = "/docs", consumes = {"multipart/form-data"})
 //    public ResponseEntity<CommonResponse<DocumentationImageResponse>> updateDocumentation(
-//            RequestPart("file") MultipartFile file) {
-//        return service.create(UpdateDocumentationImageRequest, file);
-//            @RequestPart("data") UpdateDocumentationImageRequest request
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam("data") UpdateDocumentationImageRequest request
 //    ) {
-//        // Validation
-//        if (file.isEmpty()) {
-//            return ResponseEntity.badRequest().body(
-//                    CommonResponse.<DocumentationImageResponse>builder()
-//                            .message("File is required")
-//                            .statusCode(HttpStatus.BAD_REQUEST.value())
-//                            .build()
-//            );
-//        }
+////        // Validation
+////        if (file.isEmpty()) {
+////            return ResponseEntity.badRequest().body(
+////                    CommonResponse.<DocumentationImageResponse>builder()
+////                            .message("File is required")
+////                            .statusCode(HttpStatus.BAD_REQUEST.value())
+////                            .build()
+////            );
+////        }
+//
+//        System.out.println("file : " + file.getOriginalFilename());
 //
 //        DocumentationImageResponse documentation = scheduleService.updateDocumentation(file, request);
 //        CommonResponse<DocumentationImageResponse> response = CommonResponse
@@ -104,6 +79,19 @@ public class ScheduleController {
 //                .build();
 //        return new ResponseEntity<>(response, HttpStatus.OK);
 //    }
+
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<DocumentationImageResponse> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("scheduleId") String scheduleId
+
+    ) throws IOException {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(null); // Handle case when the file is empty
+        }
+        DocumentationImageResponse imageResponse = imageKitService.uploadImage(file, scheduleId);
+        return ResponseEntity.ok(imageResponse);
+    }
 
 //    @PostMapping("/upload")
 //    public ResponseEntity<CommonResponse<DocumentationImageResponse>> uploadDocumentationImage(
@@ -121,62 +109,4 @@ public class ScheduleController {
 //                        .build()
 //        );
 //    }
-
-
-    @GetMapping
-    public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllSchedules(
-            @RequestParam(name = "language", required = false) String language,
-            @RequestParam(name = "start-date", required = false) String startDate,
-            @RequestParam(name = "end-date", required = false) String endDate
-    ) {
-        List<ScheduleResponse> schedules = scheduleService.getAll(language, startDate, endDate);
-        CommonResponse<List<ScheduleResponse>> response = CommonResponse
-                .<List<ScheduleResponse>>builder()
-                .message("Schedule fetched successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(schedules)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/trainee/{id}")
-    public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTraineeId(
-            @PathVariable String id
-    ) {
-        List<ScheduleResponse> schedules = scheduleService.getAllByTraineeId(id);
-        CommonResponse<List<ScheduleResponse>> response = CommonResponse
-                .<List<ScheduleResponse>>builder()
-                .message("Schedule fetched successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(schedules)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/trainer/{id}")
-    public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTrainerId(
-            @PathVariable String id
-    ) {
-        List<ScheduleResponse> schedules = scheduleService.getAllByTrainerId(id);
-        CommonResponse<List<ScheduleResponse>> response = CommonResponse
-                .<List<ScheduleResponse>>builder()
-                .message("Schedule fetched successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(schedules)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<CommonResponse<?>> deleteSchedule(
-            @PathVariable String id
-    ) {
-        scheduleService.delete(id);
-        CommonResponse<?> response = CommonResponse
-                .builder()
-                .message("Schedule deleted successfully")
-                .statusCode(HttpStatus.OK.value())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 }
