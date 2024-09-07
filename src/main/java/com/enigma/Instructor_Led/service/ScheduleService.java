@@ -14,13 +14,9 @@ import java.util.UUID;
 public interface ScheduleService {
     ScheduleResponse create(CreateScheduleRequest request);
     ScheduleResponse update(UpdateScheduleRequest request);
-    DocumentationImageResponse updateDocumentation(MultipartFile file, UpdateDocumentationImageRequest request);
-    ScheduleResponse getById(String id);
+    Schedule getById(String id);
     List<ScheduleResponse> getAll(String language, String startDate, String endDate);
     List<ScheduleResponse> getAllByTraineeId(String id);
     List<ScheduleResponse> getAllByTrainerId(String id);
     void delete(String id);
-
-    Schedule createDemo(CreateScheduleRequest request);
-    Schedule getOneById(String id);
 }

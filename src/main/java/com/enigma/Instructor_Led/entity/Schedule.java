@@ -22,27 +22,24 @@ public class Schedule {
     private String id;
 
     @Column(name = "date", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd 00:00")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date date;
 
     @Column(name = "topic", nullable = false)
     private String topic;
 
-    @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "schedule")
     private List<DocumentationImage> documentationImages;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    private List<Trainee> traineeId;
+    @OneToMany(mappedBy = "schedule")
+    private List<Question> questions;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "programming_language_id")
     private ProgrammingLanguage programmingLanguage;
-
-    @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
-    private List<Question> questions;
 }

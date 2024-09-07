@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 public class ScheduleResponse {
     private String id;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date;
     private String topic;
     private String trainerId;

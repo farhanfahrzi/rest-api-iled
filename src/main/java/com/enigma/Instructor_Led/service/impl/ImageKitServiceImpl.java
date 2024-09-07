@@ -6,13 +6,13 @@ import com.enigma.Instructor_Led.entity.Schedule;
 import com.enigma.Instructor_Led.repository.DocumentationImageRepository;
 import com.enigma.Instructor_Led.repository.ScheduleRepository;
 import com.enigma.Instructor_Led.service.ImageKitService;
+import com.enigma.Instructor_Led.service.ScheduleService;
 import io.imagekit.sdk.ImageKit;
 import io.imagekit.sdk.config.Configuration;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -27,14 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class ImageKitServiceImpl implements ImageKitService {
-    private final ScheduleRepository scheduleRepository;
     private final DocumentationImageRepository documentationImageRepository;
-    private final RestClient restClient;
+    private final ScheduleService scheduleService;
     private final RestTemplate restTemplate;
     private final String PRIVATE_KEY;
     private final String PUBLIC_KEY;
@@ -42,14 +40,15 @@ public class ImageKitServiceImpl implements ImageKitService {
 
     @Autowired
     public ImageKitServiceImpl(
-            ScheduleRepository scheduleRepository, DocumentationImageRepository documentationImageRepository, RestClient restClient, RestTemplate restTemplate,
+            DocumentationImageRepository documentationImageRepository,
+            ScheduleService scheduleService,
+            RestTemplate restTemplate,
             @Value("${PrivateKey}") String privateKey,
             @Value("${PublicKey}") String publicKey,
             @Value("${UrlEndpoint}") String urlEndpoint
     ) {
-        this.scheduleRepository = scheduleRepository;
         this.documentationImageRepository = documentationImageRepository;
-        this.restClient = restClient;
+        this.scheduleService = scheduleService;
         this.restTemplate = restTemplate;
         this.PRIVATE_KEY = privateKey;
         this.PUBLIC_KEY = publicKey;
@@ -71,15 +70,7 @@ public class ImageKitServiceImpl implements ImageKitService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public DocumentationImageResponse uploadImage(MultipartFile file, String scheduleId) throws IOException {
-        // Convert file to Base64
-        // String encodedFile = Base64.getEncoder().encodeToString(file.getBytes());
-
-        // Create request body
-        // Map<String, String> requestBody = new HashMap<>();
-        // requestBody.put("file", encodedFile);
-        // requestBody.put("fileName", file.getOriginalFilename());
-
+    public DocumentationImageResponse uploadImage(MultipartFile file, String id) throws IOException {
         // Create headers
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString((PRIVATE_KEY + ":").getBytes()));
@@ -111,14 +102,6 @@ public class ImageKitServiceImpl implements ImageKitService {
                     HttpMethod.POST,
                     requestEntity,
                     new ParameterizedTypeReference<Map<String, Object>>() {});
-//            response = restClient.post()
-//                    .uri(URL_ENDPOINT + "/api/v1/upload")
-//                    .body(requestEntity)
-////                    .header(HttpHeaders.AUTHORIZATION,
-////                            "Basic " + Base64.getEncoder().encodeToString(PUBLIC_KEY.getBytes()),
-////                            HttpHeaders.CONTENT_TYPE, "application/json")
-//                    .retrieve()
-//                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {});
         } catch (HttpClientErrorException e) {
             System.out.println("Error response body: " + e.getResponseBodyAsString());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -129,10 +112,14 @@ public class ImageKitServiceImpl implements ImageKitService {
         if (responseBody == null || responseBody.get("url") == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get image URL");
         }
+        System.out.println(responseBody.get("url"));
 
         // Find Schedule by ID
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+        System.out.println(id);
+        Schedule schedule = scheduleService.getById(id);
+//        if(optionalSchedule.isEmpty()){
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule Not Found");
+//        }
 
         // Save DocumentationImage to database
         DocumentationImage documentationImage = new DocumentationImage();

@@ -1,31 +1,20 @@
 package com.enigma.Instructor_Led.service.impl;
 
-import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
-import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
-import com.enigma.Instructor_Led.dto.response.ProgrammingLanguageResponse;
-import com.enigma.Instructor_Led.dto.response.TrainerResponse;
 import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.*;
-import com.enigma.Instructor_Led.service.ImageKitService;
-import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
 import com.enigma.Instructor_Led.service.ScheduleService;
-import com.enigma.Instructor_Led.service.TrainerService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +22,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final TrainerRepository trainerRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
-    private final DocumentationImageRepository documentationImageRepository;
 
-    private final ImageKitService imageKitService;
     private final Validation validation;
 
     @Transactional(rollbackFor = Exception.class)
@@ -72,32 +59,6 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Schedule createDemo(CreateScheduleRequest createScheduleRequest) {
-        validation.validate(createScheduleRequest);
-        // Cari Trainer berdasarkan trainerId
-        Trainer trainer = trainerRepository.findById(createScheduleRequest.getTrainerId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainer not found"));
-        Schedule schedule = Schedule.builder()
-                .date(createScheduleRequest.getDate())
-                .topic(createScheduleRequest.getTopic())
-                .trainer(trainer)
-                .build();
-        // Simpan Schedule ke repository
-        schedule = scheduleRepository.saveAndFlush(schedule);
-
-        // Mapping response
-        ScheduleResponse scheduleResponse = ScheduleResponse.builder()
-                .id(schedule.getId())
-                .date(schedule.getDate())
-                .topic(schedule.getTopic())
-                .trainerId(schedule.getTrainer().getId())  // Dapatkan trainerId dari objek trainer
-                .build();
-
-        return schedule;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
     public ScheduleResponse update(UpdateScheduleRequest request) {
         // Validation
         validation.validate(request);
@@ -113,54 +74,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         return convertToResponse(updatedSchedule);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public DocumentationImageResponse updateDocumentation(MultipartFile file, UpdateDocumentationImageRequest request) {
-//        System.out.println("id : " + request.getScheduleId());
-//        System.out.println("name : " + file.getName());
-//        if (file.isEmpty()) {
-//            throw new IllegalArgumentException("File is required");
-//        }
-//
-//        // Cari schedule berdasarkan scheduleId
-//        Schedule schedule = getOneById(request.getScheduleId());
-//        System.out.println("schedule id : " + schedule.getId());
-//
-//        // Upload file ke ImageKit
-//        String imageUrl = imageKitService.uploadFileToImageKit(file);
-//        System.out.println("image url : " + imageUrl);
-//
-//        // Simpan DocumentationImage baru
-//        DocumentationImage documentationImage = DocumentationImage.builder()
-//                .link(imageUrl)
-//                .schedule(schedule)
-//                .build();
-//        documentationImageRepository.save(documentationImage);
-//        System.out.println("documentation id : " + documentationImage.getId());
-//
-//        // Return response
-//        return new DocumentationImageResponse(documentationImage.getId(), documentationImage.getLink());
-        return null;
-    }
-
-    @Override
-    public ScheduleResponse getById(String id) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
-        return convertToResponse(schedule);
-    }
-
     @Transactional(readOnly = true)
     @Override
-    public Schedule getOneById(String id) {
-//        try {
-//            return scheduleRepository.findByScheduleId(id);
-//        } catch (RuntimeException e) {
-//            throw new RuntimeException("Schedule not found", e);
-//        }
-        Optional<Schedule> schedule = scheduleRepository.findById(id);
-        System.out.println(schedule.isPresent());
-        return schedule.orElseThrow(() -> new RuntimeException("Schedule not found"));
+    public Schedule getById(String id) {
+        return scheduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Schedule not found"));
     }
 
     @Transactional(readOnly = true)

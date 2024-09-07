@@ -18,7 +18,7 @@ public class SecurityConfiguration {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/api/v1/schedules").permitAll())
+                        .requestMatchers("/api/v1/**").permitAll())
                 .build();
     }
 }
