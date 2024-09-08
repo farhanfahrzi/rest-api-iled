@@ -1,11 +1,17 @@
 package com.enigma.Instructor_Led.service.impl;
 
 import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
+import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.*;
 import com.enigma.Instructor_Led.service.ScheduleService;
+import com.enigma.Instructor_Led.specification.ScheduleSpecification;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
@@ -23,6 +29,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final TraineeRepository traineeRepository;
     private final TrainerRepository trainerRepository;
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final DocumentationImageRepository documentationImageRepository;
@@ -51,6 +58,8 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .topic(request.getTopic())
                 .trainer(trainer)
                 .programmingLanguage(programmingLanguage)
+                .documentationImages(new ArrayList<>())
+                .questions(new ArrayList<>())
                 .build();
         scheduleRepository.saveAndFlush(schedule);
 
@@ -84,19 +93,26 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Validation
         validation.validate(request);
 
-        // Find schedule from request
-        DocumentationImage documentationImage = documentationImageRepository.findById(request.getId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found")
-        );
-        Schedule schedule = scheduleRepository.findById(request.getScheduleId())
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
-        documentationImage.setSchedule(schedule);
-        List<DocumentationImage> array = new ArrayList<>();
-        array.add(documentationImage);
-        schedule.setDocumentationImages(array);
+        // Find schedule
+        Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
+
+        // Set schedule id for documentation image
+        List<DocumentationImage> documentationImages = request.getId().stream().map(
+                id -> {
+                    DocumentationImage documentationImage = documentationImageRepository.findById(id).orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Documentation not found"));
+                    documentationImage.setSchedule(schedule);
+                    return documentationImage;
+                }
+        ).toList();
+
+        // Update documentation image for schedule
+        schedule.getDocumentationImages().addAll(documentationImages);
+        Schedule updatedSchedule = scheduleRepository.saveAndFlush(schedule);
 
         // Create response
-        return convertToResponse(schedule);
+        return convertToResponse(updatedSchedule);
     }
 
     @Transactional(readOnly = true)
@@ -109,68 +125,65 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getAll(String language, String startDate, String endDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime start = startDate != null && !startDate.isEmpty() ? LocalDateTime.parse(startDate, formatter) : null;
-        LocalDateTime end = endDate != null && !endDate.isEmpty() ? LocalDateTime.parse(endDate, formatter) : null;
+    public List<Schedule> getAll() {
+        return scheduleRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<Schedule> getAll(Integer size, Integer page, String language, String startDate, String endDate) {
+        Date start = startDate != null && !startDate.isEmpty() ? Date.valueOf(startDate) : null;
+        Date end = endDate != null && !endDate.isEmpty() ? Date.valueOf(endDate) : null;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Specification<Schedule> specification = Specification.where(null);
 
         if (language != null && !language.isEmpty() && startDate != null) {
-            List<Schedule> schedules;
             if (endDate != null) {
-                schedules = scheduleRepository.findSchedulesByProgrammingLanguageNameAndDateBetween(start, end, "%" + language + "%");
+                specification = specification.and(ScheduleSpecification.hasLanguageAndStartDateAndEndDate(language,
+                        start, end));
             } else {
-                schedules = scheduleRepository.findSchedulesByProgrammingLanguageNameAndDateGreaterThanEqual(start, "%" + language + "%");
+                specification = specification.and(ScheduleSpecification.hasLanguageAndStartDate(language, start));
             }
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            return scheduleRepository.findAll(specification, pageable);
         }
 
         if (language != null && !language.isEmpty() && endDate != null) {
-            List<Schedule> schedules = scheduleRepository.findSchedulesByProgrammingLanguageNameAndDateLessThanEqual(end, "%" + language + "%");
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            specification = specification.and(ScheduleSpecification.hasLanguageAndEndDate(language, end));
+            return scheduleRepository.findAll(specification, pageable);
         }
 
         if (language != null && !language.isEmpty()) {
-            List<Schedule> schedules = scheduleRepository.findSchedulesByProgrammingLanguageName("%" + language + "%");
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            specification = specification.and(ScheduleSpecification.hasLanguage(language));
+            return scheduleRepository.findAll(specification, pageable);
         }
 
         if (startDate != null && endDate != null) {
-            List<Schedule> schedules = scheduleRepository.findSchedulesByDateBetween(start, end);
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            specification = specification.and(ScheduleSpecification.hasStartDateAndEndDate(start, end));
+            return scheduleRepository.findAll(specification, pageable);
         }
 
         if (startDate != null && !startDate.isEmpty()) {
-            List<Schedule> schedules = scheduleRepository.findSchedulesByDateGreaterThanEqual(start);
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            specification = specification.and(ScheduleSpecification.hasStartDate(start));
+            return scheduleRepository.findAll(specification, pageable);
         }
 
         if (endDate != null && !endDate.isEmpty()) {
-            List<Schedule> schedules = scheduleRepository.findSchedulesByDateLessThanEqual(end);
-            return schedules.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+            specification = specification.and(ScheduleSpecification.hasEndDate(end));
+            return scheduleRepository.findAll(specification, pageable);
         }
 
-        List<Schedule> schedules = scheduleRepository.findAll();
-        return schedules.stream()
-                .map(this::convertToResponse)
-                .toList();
+        return scheduleRepository.findAll(specification, pageable);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ScheduleResponse> getAllByTraineeId(String id) {
-        return null;
+        Trainee trainee = traineeRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainee not found")
+        );
+        List<Schedule> schedules = scheduleRepository.findAllByTraineeId(trainee.getId());
+        return schedules.stream().map(this::convertToResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -200,7 +213,12 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .topic(schedule.getTopic())
                 .trainerId(schedule.getTrainer().getId())
                 .programmingLanguageId(schedule.getProgrammingLanguage().getId())
-                .documentationImages(null)
+                .documentationImages(schedule.getDocumentationImages().stream().map(
+                        doc -> DocumentationImageResponse.builder()
+                                .id(doc.getId())
+                                .link(doc.getLink())
+                                .build()
+                ).toList())
                 .build();
     }
 }

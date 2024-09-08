@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,9 +19,9 @@ public class UpdateDocumentationImageRequest {
     @NotBlank(message = "Schedule id is required")
     private String scheduleId;
 
-    @NotBlank(message = "Link is required")
-    private String link;
+    @NotNull(message = "Link is required")
+    private List<String> link;
 
-    @NotBlank
-    private String id;
+    @NotNull
+    private List<String> id;
 }
