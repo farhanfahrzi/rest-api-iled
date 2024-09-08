@@ -27,6 +27,7 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final Validation validation;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ProgrammingLanguageResponse create(CreateProgrammingLanguageRequest request) {
         validation.validate(request);
@@ -40,11 +41,13 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
         return mapToResponse(savedProgrammingLanguage);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public ProgrammingLanguageResponse update(UpdateProgrammingLanguageRequest updateProgrammingLanguageRequest) {
         return null;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ProgrammingLanguageResponse getById(String id) {
         Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageRepository.findById(id);
@@ -56,6 +59,7 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<ProgrammingLanguageResponse> getAll(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -64,10 +68,12 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
         return programmingLanguagePage.map(this::mapToResponse);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
         programmingLanguageRepository.deleteById(id);
     }
+
 
     private ProgrammingLanguageResponse mapToResponse(ProgrammingLanguage programmingLanguage) {
         return ProgrammingLanguageResponse.builder()

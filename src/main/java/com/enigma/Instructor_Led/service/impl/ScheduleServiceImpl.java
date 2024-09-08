@@ -1,10 +1,8 @@
 package com.enigma.Instructor_Led.service.impl;
 
 import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
-import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.*;
-import com.enigma.Instructor_Led.service.ImageKitService;
 import com.enigma.Instructor_Led.service.ScheduleService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +12,11 @@ import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -112,8 +110,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Transactional(readOnly = true)
     @Override
     public List<ScheduleResponse> getAll(String language, String startDate, String endDate) {
-        Date start = startDate != null && !startDate.isEmpty() ? Date.valueOf(startDate) : null;
-        Date end = endDate != null && !endDate.isEmpty() ? Date.valueOf(endDate) : null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime start = startDate != null && !startDate.isEmpty() ? LocalDateTime.parse(startDate, formatter) : null;
+        LocalDateTime end = endDate != null && !endDate.isEmpty() ? LocalDateTime.parse(endDate, formatter) : null;
 
         if (language != null && !language.isEmpty() && startDate != null) {
             List<Schedule> schedules;

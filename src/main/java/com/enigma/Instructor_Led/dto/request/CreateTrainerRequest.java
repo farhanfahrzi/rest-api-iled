@@ -24,16 +24,16 @@ public class CreateTrainerRequest {
 
     @NotNull(message = "Birth date is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    // @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "format tanggal harus 'yyyy-MM-dd'")
     private Date birthDate;
 
     @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^08\\d{9,11}$", message = "Phone number must be valid, starts with '08' and followed by 9 to 11 numbers")
     private String phoneNumber;
 
     @NotBlank(message = "Address is required")
     private String address;
 
-//    @NotEmpty(message = "Programming Language")
-//    private List<String> programmingLanguages;
+    @NotEmpty(message = "Programming Language")
+    private List<String> programmingLanguages;
 
 }

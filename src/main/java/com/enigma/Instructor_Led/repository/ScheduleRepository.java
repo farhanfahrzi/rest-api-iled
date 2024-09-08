@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -17,22 +17,22 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
             "ON s.programming_language_id = pl.id WHERE s.date BETWEEN :startDate AND :endDate " +
             "AND pl.programming_language LIKE :language",
             nativeQuery = true)
-    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateBetween(@Param("startDate") Date startDate,
-                                                                        @Param("endDate") Date endDate,
+    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateBetween(@Param("startDate") LocalDateTime startDate,
+                                                                        @Param("endDate") LocalDateTime endDate,
                                                                         @Param("language") String language);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
             "ON s.programming_language_id = pl.id WHERE s.date >= :startDate " +
             "AND pl.programming_language LIKE :language",
             nativeQuery = true)
-    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateGreaterThanEqual(@Param("startDate") Date startDate,
+    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateGreaterThanEqual(@Param("startDate") LocalDateTime startDate,
                                                                         @Param("language") String language);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
             "ON s.programming_language_id = pl.id WHERE s.date <= :endDate " +
             "AND pl.programming_language LIKE :language",
             nativeQuery = true)
-    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateLessThanEqual(@Param("endDate") Date endDate,
+    List<Schedule> findSchedulesByProgrammingLanguageNameAndDateLessThanEqual(@Param("endDate") LocalDateTime endDate,
                                                                             @Param("language") String language);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
@@ -42,13 +42,14 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
 
     @Query(value = "SELECT s.* FROM t_schedule s WHERE s.date BETWEEN :startDate AND :endDate",
             nativeQuery = true)
-    List<Schedule> findSchedulesByDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    List<Schedule> findSchedulesByDateBetween(@Param("startDate") LocalDateTime startDate,
+                                              @Param("endDate") LocalDateTime endDate);
 
     @Query(value = "SELECT s.* FROM t_schedule s WHERE s.date >= :startDate",
             nativeQuery = true)
-    List<Schedule> findSchedulesByDateGreaterThanEqual(@Param("startDate") Date startDate);
+    List<Schedule> findSchedulesByDateGreaterThanEqual(@Param("startDate") LocalDateTime startDate);
 
     @Query(value = "SELECT s.* FROM t_schedule s WHERE s.date <= :endDate",
             nativeQuery = true)
-    List<Schedule> findSchedulesByDateLessThanEqual(@Param("endDate") Date endDate);
+    List<Schedule> findSchedulesByDateLessThanEqual(@Param("endDate") LocalDateTime endDate);
 }

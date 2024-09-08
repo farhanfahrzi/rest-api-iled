@@ -1,10 +1,8 @@
 package com.enigma.Instructor_Led.dto.request;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,9 +27,12 @@ public class UpdateTrainerRequest {
     @Email
     private String email;
 
+    @NotNull(message = "Birth date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
 
     @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^08\\d{9,11}$", message = "Phone number must be valid, starts with '08' and followed by 9 to 11 numbers")
     private String phoneNumber;
 
     @NotBlank(message = "Address is required")

@@ -26,12 +26,12 @@ public class TraineeController {
     private final TraineeService traineeService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<Trainee>> createNewTrainee(@RequestBody CreateTraineeRequest traineeRequest) {
-        Trainee newTrainee = traineeService.create(traineeRequest);
-        CommonResponse<Trainee> commonResponse = CommonResponse.<Trainee>builder()
+    public ResponseEntity<CommonResponse<TraineeResponse>> createNewTrainee(@RequestBody CreateTraineeRequest traineeRequest) {
+        TraineeResponse trainee = traineeService.create(traineeRequest);
+        CommonResponse<TraineeResponse> commonResponse = CommonResponse.<TraineeResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .message("Trainee created successfully")
-                .data(newTrainee)
+                .data(trainee)
                 .build();
         return ResponseEntity
                 .status(HttpStatus.CREATED)

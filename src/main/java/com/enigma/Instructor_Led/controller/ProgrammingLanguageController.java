@@ -72,12 +72,12 @@ public class ProgrammingLanguageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse<Void>> deleteProgrammingLanguage(@PathVariable String id) {
+    public ResponseEntity<CommonResponse<?>> deleteProgrammingLanguage(@PathVariable String id) {
         programmingLanguageService.delete(id);
-        CommonResponse<Void> response = CommonResponse.<Void>builder()
+        CommonResponse<?> response = CommonResponse.builder()
                 .message("Programming Language deleted successfully")
                 .statusCode(HttpStatus.NO_CONTENT.value())
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

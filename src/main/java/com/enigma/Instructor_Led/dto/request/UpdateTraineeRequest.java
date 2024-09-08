@@ -4,6 +4,7 @@ import com.enigma.Instructor_Led.constant.TraineeStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,9 +28,8 @@ public class UpdateTraineeRequest {
     @NotBlank(message = "NIK is required")
     private String nik;
 
-    @NotBlank(message = "Birth date is required")
+    @NotNull(message = "Birth date is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "format tanggal harus 'yyyy-MM-dd'")
     private Date birthDate;
 
     @NotBlank(message = "Address is required")
@@ -39,7 +39,7 @@ public class UpdateTraineeRequest {
     @Email
     private String email;
 
-    @Pattern(regexp = "^08\\d{9,11}$", message = "nomor telepon harus valid dan diawali dengan '08' diikuti oleh 9 hingga 11 angka")
+    @Pattern(regexp = "^08\\d{9,11}$", message = "Phone number must be valid, starts with '08' and followed by 9 to 11 numbers")
     @NotBlank(message = "Phone Number is required")
     private String phoneNumber;
 

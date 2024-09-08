@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final Validation validation;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
         validation.validate(createTraineeRequest);
@@ -50,6 +52,7 @@ public class TraineeServiceImpl implements TraineeService {
         return mapToResponse(savedTrainee);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TraineeResponse update(UpdateTraineeRequest updateTraineeRequest) {
         validation.validate(updateTraineeRequest);
@@ -71,21 +74,33 @@ public class TraineeServiceImpl implements TraineeService {
         return mapToResponse(updatedTrainee);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TraineeResponse getById(String id) {
         Optional<Trainee> traineeOpt = traineeRepository.findById(id);
         return traineeOpt.map(this::mapToResponse).orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Trainee getOneById(String id) {
+        return traineeRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainee not found")
+        );
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public Page<TraineeResponse> getAll(Pageable pageable) {
         return traineeRepository.findAll(pageable).map(this::mapToResponse);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
         traineeRepository.deleteById(id);
     }
+
 
     private TraineeResponse mapToResponse(Trainee trainee) {
         return TraineeResponse.builder()

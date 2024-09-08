@@ -1,6 +1,5 @@
 package com.enigma.Instructor_Led.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +17,7 @@ public class AttendanceResponse {
 
     private ScheduleResponse schedule;
 
-    private Date transDate;
+    private Date attendanceDate;
 
     private List<AttendanceDetailResponse> attendanceDetails;
 }

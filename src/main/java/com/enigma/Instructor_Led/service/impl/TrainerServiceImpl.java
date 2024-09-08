@@ -32,6 +32,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final Validation validation;
     private final ScheduleRepository scheduleRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TrainerResponse create(CreateTrainerRequest createTrainerRequest) {
         validation.validate(createTrainerRequest);
@@ -55,6 +56,7 @@ public class TrainerServiceImpl implements TrainerService {
         return mapToResponse(savedTrainer);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public TrainerResponse update(UpdateTrainerRequest updateTrainerRequest) {
         validation.validate(updateTrainerRequest);
@@ -74,12 +76,13 @@ public class TrainerServiceImpl implements TrainerService {
                         .orElseThrow(() -> new RuntimeException("Programming Language not found")))
                 .collect(Collectors.toList());
 
-        // trainer.setProgrammingLanguages(programmingLanguages);
+        trainer.setProgrammingLanguages(programmingLanguages);
         Trainer updatedTrainer = trainerRepository.save(trainer);
 
         return mapToResponse(updatedTrainer);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainerResponse getById(String id) {
         Trainer trainer = trainerRepository.findById(id)
@@ -87,12 +90,14 @@ public class TrainerServiceImpl implements TrainerService {
         return mapToResponse(trainer);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Page<TrainerResponse> getAll(Pageable pageable) {
         Page<Trainer> trainerPage = trainerRepository.findAll(pageable);
         return trainerPage.map(this::mapToResponse);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
         trainerRepository.deleteById(id);
@@ -100,9 +105,9 @@ public class TrainerServiceImpl implements TrainerService {
 
 
     private TrainerResponse mapToResponse(Trainer trainer) {
-//        List<String> programmingLanguages = trainer.getProgrammingLanguages().stream()
-//                .map(ProgrammingLanguage::getProgrammingLanguage)
-//                .collect(Collectors.toList());
+        List<String> programmingLanguages = trainer.getProgrammingLanguages().stream()
+                .map(ProgrammingLanguage::getProgrammingLanguage)
+                .toList();
 
         return TrainerResponse.builder()
                 .id(trainer.getId())
@@ -112,7 +117,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .phoneNumber(trainer.getPhoneNumber())
                 .address(trainer.getAddress())
                 .userAccountId(trainer.getUserAccount() != null ? trainer.getUserAccount().getId() : null)
-                // .programmingLanguages(programmingLanguages)
+                .programmingLanguagesNames(programmingLanguages)
                 .build();
     }
 }

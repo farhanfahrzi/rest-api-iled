@@ -69,6 +69,13 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .date(attendance.getSchedule().getDate())
                 .topic(attendance.getSchedule().getTopic())
                 .trainerId(attendance.getSchedule().getTrainer().getId())
+                .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage().getId())
+                .documentationImages(attendance.getSchedule().getDocumentationImages().stream().map(
+                        doc -> DocumentationImageResponse.builder()
+                                .id(doc.getId())
+                                .link(doc.getLink())
+                                .build())
+                        .toList())
                 .build();
 
         return AttendanceResponse.builder()
@@ -101,7 +108,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             return AttendanceResponse.builder()
                     .id(attendance.getId())
                     .schedule(scheduleResponse)
-                    .transDate(attendance.getDate())
+                    .attendanceDate(attendance.getDate())
                     .attendanceDetails(attendanceDetailResponses)
                     .build();
         }).toList();

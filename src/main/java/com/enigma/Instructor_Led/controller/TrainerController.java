@@ -84,9 +84,9 @@ public class TrainerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse<Void>> deleteTrainer(@PathVariable String id) {
+    public ResponseEntity<CommonResponse<?>> deleteTrainer(@PathVariable String id) {
         trainerService.delete(id);
-        CommonResponse<Void> response = CommonResponse.<Void>builder()
+        CommonResponse<?> response = CommonResponse.builder()
                 .message("Trainer deleted successfully")
                 .statusCode(HttpStatus.OK.value())
                 .build();
