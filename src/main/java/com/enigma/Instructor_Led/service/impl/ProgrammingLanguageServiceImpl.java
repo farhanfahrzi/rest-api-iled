@@ -59,6 +59,11 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
         }
     }
 
+    @Override
+    public ProgrammingLanguage getOneById(String id) {
+      return programmingLanguageRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Programming Language not found"));
+    }
+
     @Transactional(readOnly = true)
     @Override
     public Page<ProgrammingLanguageResponse> getAll(Integer page, Integer size) {

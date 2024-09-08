@@ -49,7 +49,6 @@ public class ProgrammingLanguageController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
-        // Assuming the service method `getAll` returns a paginated result
         Page<ProgrammingLanguageResponse> programmingLanguageResponses = programmingLanguageService.getAll(page, size);
 
         PagingResponse pagingResponse = PagingResponse.builder()

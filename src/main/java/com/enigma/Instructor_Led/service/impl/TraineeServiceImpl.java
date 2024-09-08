@@ -28,6 +28,11 @@ public class TraineeServiceImpl implements TraineeService {
     private final ProgrammingLanguageRepository programmingLanguageRepository;
     private final Validation validation;
 
+    @Override
+    public Trainee createTrainee(Trainee trainee) {
+        return traineeRepository.saveAndFlush(trainee);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {

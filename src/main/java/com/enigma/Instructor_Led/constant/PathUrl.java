@@ -9,5 +9,5 @@ public class PathUrl {
     public static final String TRAINEE = API_V1 + "/trainees";
     public static final String ATTENDANCE = API_V1 + "/attendances";
     public static final String SCHEDULE = API_V1 + "/schedules";
-
+    public static final String AUTH_API = API_V1 + "/auth";
 }
