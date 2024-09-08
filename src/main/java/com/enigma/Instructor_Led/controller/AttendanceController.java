@@ -30,19 +30,12 @@ public class AttendanceController {
                 .statusCode(HttpStatus.CREATED.value())
                 .data(attendance)
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<AttendanceResponse>>> getAllAttendance(){
-        List<AttendanceResponse> attendances = attendanceService.getAll();
-        CommonResponse<List<AttendanceResponse>> response = CommonResponse
-                .<List<AttendanceResponse>>builder()
-                .message("Attendance fetched successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(attendances)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public List<AttendanceResponse> getAllAttendance(){
+        return attendanceService.getAll();
     }
 
 }
