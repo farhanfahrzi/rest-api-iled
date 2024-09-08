@@ -6,6 +6,7 @@ import com.enigma.Instructor_Led.dto.response.AdminResponse;
 import com.enigma.Instructor_Led.entity.Admin;
 import com.enigma.Instructor_Led.repository.AdminRepository;
 import com.enigma.Instructor_Led.service.AdminService;
+import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,12 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
+    private final Validation validation;
 
     @Override
     public AdminResponse create(CreateAdminRequest createAdminRequest) {
+        validation.validate(createAdminRequest);
+
         Admin admin = Admin.builder()
                 .name(createAdminRequest.getName())
                 .email(createAdminRequest.getEmail())
@@ -36,6 +40,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminResponse update(UpdateAdminRequest updateAdminRequest) {
+        validation.validate(updateAdminRequest);
+
         Optional<Admin> adminOpt = adminRepository.findById(updateAdminRequest.getId());
         if (adminOpt.isEmpty()) {
             return null;

@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -29,4 +30,9 @@ public class UpdateScheduleRequest {
     @NotBlank(message = "Trainer is required")
     private String trainerId;
 
+    @NotBlank(message = "Language is required")
+    private String programmingLanguageId;
+
+    @NotBlank(message = "Trainee is required")
+    private List<String> traineeIds;
 }
