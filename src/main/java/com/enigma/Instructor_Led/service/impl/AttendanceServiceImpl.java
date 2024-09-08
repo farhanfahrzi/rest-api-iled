@@ -60,7 +60,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     // Membuat response untuk Attendance
                     return AttendanceDetailResponse.builder()
                             .id(detail.getId())
-                            .traineeId(detail.getId())
+                            .traineeId(detail.getTrainee().getId())
                             .build();
                 }).toList();
 
@@ -71,16 +71,18 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .trainerId(attendance.getSchedule().getTrainer().getId())
                 .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage().getId())
                 .documentationImages(attendance.getSchedule().getDocumentationImages().stream().map(
-                        doc -> DocumentationImageResponse.builder()
-                                .id(doc.getId())
-                                .link(doc.getLink())
-                                .build())
+                                doc -> DocumentationImageResponse.builder()
+                                        .id(doc.getId())
+                                        .link(doc.getLink())
+                                        .build())
                         .toList())
                 .build();
 
         return AttendanceResponse.builder()
                 .id(attendance.getId())
                 .schedule(scheduleResponse)
+                .attendanceDate(attendance.getDate())
+                .attendanceDetails(attendanceDetailResponse)
                 .build();
 
     }
@@ -90,11 +92,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     public List<AttendanceResponse> getAll() {
         List<Attendance> attendanceAll = attendanceRepository.findAll();
         return attendanceAll.stream().map(attendance -> {
-            List<AttendanceDetailResponse> attendanceDetailResponses = attendance.getAttendanceDetails().stream()
+            List<AttendanceDetailResponse> attendanceDetailResponse = attendance.getAttendanceDetails().stream()
                     .map(detail -> {
                         return AttendanceDetailResponse.builder()
                                 .id(detail.getId())
-                                .traineeId(detail.getId())
+                                .traineeId(detail.getTrainee().getId())
                                 .build();
                     }).toList();
 
@@ -103,13 +105,15 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .date(attendance.getSchedule().getDate())
                     .topic(attendance.getSchedule().getTopic())
                     .trainerId(attendance.getSchedule().getTrainer().getId())
+                    .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage()!= null ?
+                            attendance.getSchedule().getProgrammingLanguage().getId() : null)
                     .build();
 
             return AttendanceResponse.builder()
                     .id(attendance.getId())
                     .schedule(scheduleResponse)
                     .attendanceDate(attendance.getDate())
-                    .attendanceDetails(attendanceDetailResponses)
+                    .attendanceDetails(attendanceDetailResponse)
                     .build();
         }).toList();
     }

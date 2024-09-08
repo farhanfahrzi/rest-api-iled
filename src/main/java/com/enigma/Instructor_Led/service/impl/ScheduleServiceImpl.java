@@ -103,8 +103,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public Schedule getById(String id) {
         System.out.println("id inputted: " + id);
-        return scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+        return scheduleRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found")
+        );
     }
 
     @Transactional(readOnly = true)
