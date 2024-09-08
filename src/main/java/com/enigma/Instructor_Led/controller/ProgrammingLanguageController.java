@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class ProgrammingLanguageController {
 
     private final ProgrammingLanguageService programmingLanguageService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<ProgrammingLanguageResponse>> createProgrammingLanguage(
             @RequestBody CreateProgrammingLanguageRequest createRequest) {
@@ -33,6 +35,7 @@ public class ProgrammingLanguageController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<ProgrammingLanguageResponse>> getProgrammingLanguageById(@PathVariable String id) {
        ProgrammingLanguageResponse programmingLanguageResponse = programmingLanguageService.getById(id);
@@ -44,6 +47,7 @@ public class ProgrammingLanguageController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProgrammingLanguageResponse>>> getAllProgrammingLanguages(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -70,6 +74,7 @@ public class ProgrammingLanguageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<?>> deleteProgrammingLanguage(@PathVariable String id) {
         programmingLanguageService.delete(id);

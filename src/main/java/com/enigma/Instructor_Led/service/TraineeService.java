@@ -15,6 +15,6 @@ public interface TraineeService {
     TraineeResponse update(UpdateTraineeRequest updateTraineeRequest);
     TraineeResponse getById(String id);
     Trainee getOneById(String id);
-    Page<TraineeResponse> getAll(Pageable pageable);
+    Page<TraineeResponse> getAll(Pageable pageable, String name, String email, String nik);
     void delete(String id);
 }

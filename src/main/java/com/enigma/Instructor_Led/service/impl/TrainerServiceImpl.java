@@ -9,11 +9,13 @@ import com.enigma.Instructor_Led.entity.Trainer;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.ScheduleRepository;
 import com.enigma.Instructor_Led.repository.TrainerRepository;
+import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
 import com.enigma.Instructor_Led.service.TrainerService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerRepository trainerRepository;
-    private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final ProgrammingLanguageService programmingLanguageService;
     private final Validation validation;
     private final ScheduleRepository scheduleRepository;
 
@@ -45,12 +47,11 @@ public class TrainerServiceImpl implements TrainerService {
                 .address(createTrainerRequest.getAddress())
                 .build();
 
-//        List<ProgrammingLanguage> programmingLanguages = createTrainerRequest.getProgrammingLanguages().stream()
-//                .map(langId -> programmingLanguageRepository.findById(langId)
-//                        .orElseThrow(() -> new RuntimeException("Programming Language not found")))
-//                .collect(Collectors.toList());
-//
-//        trainer.setProgrammingLanguages(programmingLanguages);
+        List<ProgrammingLanguage> programmingLanguages = createTrainerRequest.getProgrammingLanguages().stream()
+                .map(programmingLanguageService::getOneById)
+                .toList();
+
+        trainer.setProgrammingLanguages(programmingLanguages);
         Trainer savedTrainer = trainerRepository.save(trainer);
 
         return mapToResponse(savedTrainer);
@@ -70,11 +71,9 @@ public class TrainerServiceImpl implements TrainerService {
         trainer.setPhoneNumber(updateTrainerRequest.getPhoneNumber());
         trainer.setAddress(updateTrainerRequest.getAddress());
 
-        // Handle Programming Languages
         List<ProgrammingLanguage> programmingLanguages = updateTrainerRequest.getProgrammingLanguages().stream()
-                .map(langId -> programmingLanguageRepository.findById(langId)
-                        .orElseThrow(() -> new RuntimeException("Programming Language not found")))
-                .collect(Collectors.toList());
+                .map(programmingLanguageService::getOneById)
+                .toList();
 
         trainer.setProgrammingLanguages(programmingLanguages);
         Trainer updatedTrainer = trainerRepository.save(trainer);
@@ -90,16 +89,31 @@ public class TrainerServiceImpl implements TrainerService {
         return mapToResponse(trainer);
     }
 
+    @Override
+    public Trainer getOneById(String id) {
+      return trainerRepository.findById(id).orElseThrow(() -> new RuntimeException("Trainer not found"));
+    }
+
     @Transactional(readOnly = true)
     @Override
-    public Page<TrainerResponse> getAll(Pageable pageable) {
-        Page<Trainer> trainerPage = trainerRepository.findAll(pageable);
-        return trainerPage.map(this::mapToResponse);
+    public Page<TrainerResponse> getAll(Pageable pageable, String name, String email) {
+        Specification<Trainer> spec = Specification.where(null);
+
+        if (name != null && !name.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+        }
+
+        Page<Trainer> trainees = trainerRepository.findAll(spec, pageable);
+        return trainees.map(this::mapToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
+        Trainer trainer = getOneById(id);
         trainerRepository.deleteById(id);
     }
 
@@ -107,7 +121,7 @@ public class TrainerServiceImpl implements TrainerService {
     private TrainerResponse mapToResponse(Trainer trainer) {
         List<String> programmingLanguages = trainer.getProgrammingLanguages().stream()
                 .map(ProgrammingLanguage::getProgrammingLanguage)
-                .toList();
+                .collect(Collectors.toList());
 
         return TrainerResponse.builder()
                 .id(trainer.getId())
@@ -117,7 +131,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .phoneNumber(trainer.getPhoneNumber())
                 .address(trainer.getAddress())
                 .userAccountId(trainer.getUserAccount() != null ? trainer.getUserAccount().getId() : null)
-                .programmingLanguagesNames(programmingLanguages)
+                .programmingLanguages(programmingLanguages)
                 .build();
     }
 }

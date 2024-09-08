@@ -13,7 +13,8 @@ public interface TrainerService {
     TrainerResponse create(CreateTrainerRequest createTraineeRequest);
     TrainerResponse update(UpdateTrainerRequest updateTraineeRequest);
     TrainerResponse getById(String id);
-    Page<TrainerResponse> getAll(Pageable pageable);
+    Trainer getOneById(String id);
+    Page<TrainerResponse> getAll(Pageable pageable, String name, String email);
     void delete(String id);
 
 }

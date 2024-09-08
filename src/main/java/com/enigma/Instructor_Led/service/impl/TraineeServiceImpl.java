@@ -8,11 +8,13 @@ import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
 import com.enigma.Instructor_Led.entity.Trainee;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.TraineeRepository;
+import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
 import com.enigma.Instructor_Led.service.TraineeService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,7 @@ import java.util.Optional;
 public class TraineeServiceImpl implements TraineeService {
 
     private final TraineeRepository traineeRepository;
-    private final ProgrammingLanguageRepository programmingLanguageRepository;
+    private final ProgrammingLanguageService programmingLanguageService;
     private final Validation validation;
 
     @Override
@@ -38,10 +40,7 @@ public class TraineeServiceImpl implements TraineeService {
     public TraineeResponse create(CreateTraineeRequest createTraineeRequest) {
         validation.validate(createTraineeRequest);
 
-        ProgrammingLanguage programmingLanguage = programmingLanguageRepository
-                .findById(createTraineeRequest.getProgrammingLanguageId()).orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "notfound"));
-
+        ProgrammingLanguage programmingLanguage = programmingLanguageService.getOneById(createTraineeRequest.getProgrammingLanguageId());
         Trainee trainee = Trainee.builder()
                 .name(createTraineeRequest.getName())
                 .nik(createTraineeRequest.getNik())
@@ -62,12 +61,12 @@ public class TraineeServiceImpl implements TraineeService {
     public TraineeResponse update(UpdateTraineeRequest updateTraineeRequest) {
         validation.validate(updateTraineeRequest);
 
-        Optional<Trainee> traineeOpt = traineeRepository.findById(updateTraineeRequest.getId());
-        if (traineeOpt.isEmpty()) {
-            return null; // Or throw an exception
-        }
+//        Optional<Trainee> traineeOpt = traineeRepository.findById(updateTraineeRequest.getId());
+//        if (traineeOpt.isEmpty()) {
+//            return null; // Or throw an exception
+//        }
 
-        Trainee trainee = traineeOpt.get();
+        Trainee trainee = getOneById(updateTraineeRequest.getId());
         trainee.setName(updateTraineeRequest.getName());
         trainee.setNik(updateTraineeRequest.getNik());
         trainee.setBirthDate(updateTraineeRequest.getBirthDate());
@@ -96,14 +95,29 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TraineeResponse> getAll(Pageable pageable) {
-        return traineeRepository.findAll(pageable).map(this::mapToResponse);
+    public Page<TraineeResponse> getAll(Pageable pageable, String name, String email, String nik) {
+        Specification<Trainee> spec = Specification.where(null);
+
+        if (name != null && !name.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (nik != null && !nik.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("nik"), nik));
+        }
+        if (email != null && !email.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+        }
+
+        Page<Trainee> trainees = traineeRepository.findAll(spec, pageable);
+        return trainees.map(this::mapToResponse);
     }
+
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {
-        traineeRepository.deleteById(id);
+        Trainee trainee = getOneById(id);
+        traineeRepository.delete(trainee);
     }
 
 

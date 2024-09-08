@@ -20,5 +20,5 @@ public class TrainerResponse {
     private String phoneNumber;
     private String address;
     private String userAccountId;
-    private List<String> programmingLanguagesNames;
+    private List<String> programmingLanguages;
 }
