@@ -5,11 +5,15 @@ import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.CommonResponse;
 import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
+import com.enigma.Instructor_Led.dto.response.PagingResponse;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
 import com.enigma.Instructor_Led.entity.Schedule;
 import com.enigma.Instructor_Led.service.ImageKitService;
 import com.enigma.Instructor_Led.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -110,16 +114,42 @@ public class ScheduleController {
 
     @GetMapping
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllSchedules(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
             @RequestParam(name = "language", required = false) String language,
             @RequestParam(name = "start-date", required = false) String startDate,
             @RequestParam(name = "end-date", required = false) String endDate
     ) {
-        List<ScheduleResponse> schedules = scheduleService.getAll(language, startDate, endDate);
+        Page<Schedule> pagedSchedules = scheduleService.getAll(size, page, language, startDate, endDate);
+
+        List<ScheduleResponse> schedules = pagedSchedules.stream().map(
+                schedule -> ScheduleResponse.builder()
+                        .id(schedule.getId())
+                        .date(schedule.getDate())
+                        .topic((schedule.getTopic()))
+                        .trainerId((schedule.getTrainer().getId()))
+                        .documentationImages(schedule.getDocumentationImages().stream().map(
+                                doc -> DocumentationImageResponse.builder()
+                                        .id(doc.getId())
+                                        .link(doc.getLink())
+                                        .build()
+                        ).toList())
+                        .build()
+        ).toList();
+
         CommonResponse<List<ScheduleResponse>> response = CommonResponse
                 .<List<ScheduleResponse>>builder()
                 .message("Schedule fetched successfully")
                 .statusCode(HttpStatus.OK.value())
                 .data(schedules)
+                .paging(PagingResponse.builder()
+                        .totalPages(pagedSchedules.getTotalPages())
+                        .totalElement(pagedSchedules.getTotalElements())
+                        .page(page)
+                        .size(size)
+                        .hasNext(pagedSchedules.hasNext())
+                        .hasPrevious(pagedSchedules.hasPrevious())
+                        .build())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

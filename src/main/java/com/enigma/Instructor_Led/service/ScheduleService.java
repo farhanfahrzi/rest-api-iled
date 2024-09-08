@@ -6,6 +6,8 @@ import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
 import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
 import com.enigma.Instructor_Led.entity.Schedule;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,7 +19,8 @@ public interface ScheduleService {
     ScheduleResponse update(UpdateScheduleRequest request);
     ScheduleResponse updateDocumentation(UpdateDocumentationImageRequest request);
     Schedule getById(String id);
-    List<ScheduleResponse> getAll(String language, String startDate, String endDate);
+    List<Schedule> getAll();
+    Page<Schedule> getAll(Integer size, Integer page, String language, String startDate, String endDate);
     List<ScheduleResponse> getAllByTraineeId(String id);
     List<ScheduleResponse> getAllByTrainerId(String id);
     void delete(String id);

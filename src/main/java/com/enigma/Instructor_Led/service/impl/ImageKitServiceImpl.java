@@ -117,7 +117,7 @@ public class ImageKitServiceImpl implements ImageKitService {
 
         // Find Schedule by ID
         System.out.println(id);
-        Schedule schedule = scheduleService.getById(id);
+        Schedule schedule = scheduleService.getById(id); // stuck di sini, kalo ngerubah secara manual bisa
 
         // Save DocumentationImage to database
         DocumentationImage documentationImage = new DocumentationImage();

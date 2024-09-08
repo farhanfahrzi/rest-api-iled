@@ -1,6 +1,9 @@
 package com.enigma.Instructor_Led.repository;
 
 import com.enigma.Instructor_Led.entity.Schedule;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +15,12 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     List<Schedule> findAllByTrainerId(String id);
+
+    @Query(value = "SELECT s.* FROM t_schedule s " +
+            "JOIN t_programming_language pl ON s.programming_language_id = pl.id " +
+            "JOIN m_trainee t ON t.programming_language_id = pl.id " +
+            "WHERE t.id = :id", nativeQuery = true)
+    List<Schedule> findAllByTraineeId(String id);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
             "ON s.programming_language_id = pl.id WHERE s.date BETWEEN :startDate AND :endDate " +
@@ -52,4 +61,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     @Query(value = "SELECT s.* FROM t_schedule s WHERE s.date <= :endDate",
             nativeQuery = true)
     List<Schedule> findSchedulesByDateLessThanEqual(@Param("endDate") LocalDateTime endDate);
+
+    Page<Schedule> findAll(Specification<Schedule> specification, Pageable pageable);
 }
