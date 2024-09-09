@@ -1,16 +1,17 @@
 package com.enigma.Instructor_Led.service.impl;
 
+import com.enigma.Instructor_Led.constant.UserRole;
 import com.enigma.Instructor_Led.dto.request.CreateTrainerRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateTrainerRequest;
 import com.enigma.Instructor_Led.dto.response.ProgrammingLanguageResponse;
 import com.enigma.Instructor_Led.dto.response.TrainerResponse;
-import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
-import com.enigma.Instructor_Led.entity.Schedule;
-import com.enigma.Instructor_Led.entity.Trainer;
+import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.ScheduleRepository;
 import com.enigma.Instructor_Led.repository.TrainerRepository;
+import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
+import com.enigma.Instructor_Led.service.RoleService;
 import com.enigma.Instructor_Led.service.TrainerService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,14 +33,34 @@ import java.util.stream.Collectors;
 public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerRepository trainerRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final RoleService roleService;
     private final ProgrammingLanguageService programmingLanguageService;
     private final Validation validation;
+    private final PasswordEncoder passwordEncoder;
     private final ScheduleRepository scheduleRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public TrainerResponse create(CreateTrainerRequest createTrainerRequest) {
         validation.validate(createTrainerRequest);
+
+        if (userAccountRepository.findByUsername(createTrainerRequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        // Encode password
+        String hashPassword = passwordEncoder.encode(createTrainerRequest.getPassword());
+
+        Role role = roleService.getOrSave(UserRole.ROLE_TRAINER);
+        UserAccount account = UserAccount.builder()
+                .username(createTrainerRequest.getUsername())
+                .password(hashPassword)
+                .isEnable(true)
+                .roles(List.of(role))
+                .build();
+
+        userAccountRepository.saveAndFlush(account);
 
         Trainer trainer = Trainer.builder()
                 .name(createTrainerRequest.getName())
@@ -62,15 +84,31 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public TrainerResponse update(UpdateTrainerRequest updateTrainerRequest) {
         validation.validate(updateTrainerRequest);
+        if (userAccountRepository.findByUsername(updateTrainerRequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
 
-        Trainer trainer = trainerRepository.findById(updateTrainerRequest.getId())
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+        // Encode password
+        String hashPassword = passwordEncoder.encode(updateTrainerRequest.getPassword());
+
+        Role role = roleService.getOrSave(UserRole.ROLE_TRAINER);
+        UserAccount account = UserAccount.builder()
+                .username(updateTrainerRequest.getUsername())
+                .password(hashPassword)
+                .isEnable(true)
+                .roles(List.of(role))
+                .build();
+
+        userAccountRepository.saveAndFlush(account);
+
+        Trainer trainer = getOneById(updateTrainerRequest.getId());
 
         trainer.setName(updateTrainerRequest.getName());
         trainer.setEmail(updateTrainerRequest.getEmail());
         trainer.setBirthDate(updateTrainerRequest.getBirthDate());
         trainer.setPhoneNumber(updateTrainerRequest.getPhoneNumber());
         trainer.setAddress(updateTrainerRequest.getAddress());
+        trainer.setUserAccount(account);
 
         List<ProgrammingLanguage> programmingLanguages = updateTrainerRequest.getProgrammingLanguages().stream()
                 .map(programmingLanguageService::getOneById)
