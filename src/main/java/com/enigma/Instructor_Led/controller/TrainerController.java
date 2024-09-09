@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class TrainerController {
 
     private final TrainerService trainerService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<TrainerResponse>> createTrainer(@RequestBody CreateTrainerRequest createTrainerRequest) {
         TrainerResponse trainerResponse = trainerService.create(createTrainerRequest);
@@ -34,6 +36,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
     @PutMapping
     public ResponseEntity<CommonResponse<TrainerResponse>> updateTrainer(@RequestBody UpdateTrainerRequest updateTrainerRequest) {
         TrainerResponse trainerResponse = trainerService.update(updateTrainerRequest);
@@ -45,6 +48,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<TrainerResponse>> getTrainerById(@PathVariable String id) {
         TrainerResponse trainerResponse = trainerService.getById(id);
@@ -56,13 +60,17 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<TrainerResponse>>> getAllTrainers(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email
+    ) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<TrainerResponse> trainerPage = trainerService.getAll(pageable);
+        Page<TrainerResponse> trainerPage = trainerService.getAll(pageable,name,email);
 
         PagingResponse pagingResponse = PagingResponse.builder()
                 .page(page)
@@ -83,6 +91,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<?>> deleteTrainer(@PathVariable String id) {
         trainerService.delete(id);

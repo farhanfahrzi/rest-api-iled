@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ImageKitService imageKitService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<ScheduleResponse>> createSchedule(
             @RequestBody CreateScheduleRequest request
@@ -43,6 +45,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping
     public ResponseEntity<CommonResponse<ScheduleResponse>> updateSchedule(
             @RequestBody UpdateScheduleRequest request
@@ -57,6 +60,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
     @PutMapping(path = "/docs")
     public ResponseEntity<CommonResponse<ScheduleResponse>> updateDocumentation(
             @RequestBody UpdateDocumentationImageRequest request
@@ -71,6 +75,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
     @PostMapping(path = "/docs-upload", consumes = {"multipart/form-data"})
     public ResponseEntity<CommonResponse<DocumentationImageResponse>> uploadImage(
             @RequestParam("file") MultipartFile file,
@@ -91,6 +96,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/{id}")
     public ResponseEntity<CommonResponse<ScheduleResponse>> getById(
             @PathVariable("id") String id
@@ -112,6 +118,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllSchedules(
             @RequestParam(name = "page", defaultValue = "0") Integer page,

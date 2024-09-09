@@ -2,6 +2,7 @@ package com.enigma.Instructor_Led.entity;
 
 import com.enigma.Instructor_Led.constant.ConstantTable;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -44,7 +45,12 @@ public class Trainer {
     @JoinColumn(name = "user_account_id", unique = true)
     private UserAccount userAccount;
 
-    @OneToMany(mappedBy = "trainer")
+//    @OneToMany(mappedBy = "trainer")
+//    private List<ProgrammingLanguage> programmingLanguages;
+
+    @ToString.Exclude
+    @JsonManagedReference
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<ProgrammingLanguage> programmingLanguages;
 
     @OneToMany(mappedBy = "trainer")

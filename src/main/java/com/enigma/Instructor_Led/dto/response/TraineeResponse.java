@@ -20,6 +20,6 @@ public class TraineeResponse {
     private String address;
     private String email;
     private String phoneNumber;
-    private String programmingLanguage; // Assuming you need the name or ID of the programming language
+    private String programmingLanguage;
     private TraineeStatus status;
 }

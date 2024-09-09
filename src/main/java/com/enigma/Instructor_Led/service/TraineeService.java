@@ -10,11 +10,11 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TraineeService {
-//    Trainee create(CreateTraineeRequest traineeRequest);
+    Trainee createTrainee(Trainee trainee);
     TraineeResponse create(CreateTraineeRequest createTraineeRequest);
     TraineeResponse update(UpdateTraineeRequest updateTraineeRequest);
     TraineeResponse getById(String id);
     Trainee getOneById(String id);
-    Page<TraineeResponse> getAll(Pageable pageable);
+    Page<TraineeResponse> getAll(Pageable pageable, String name, String email, String nik);
     void delete(String id);
 }

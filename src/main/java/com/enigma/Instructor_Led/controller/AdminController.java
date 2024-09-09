@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<AdminResponse>> createAdmin(@RequestBody CreateAdminRequest createAdminRequest) {
         AdminResponse adminResponse = adminService.create(createAdminRequest);
@@ -35,6 +37,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping
     public ResponseEntity<CommonResponse<AdminResponse>> updateAdmin(@RequestBody UpdateAdminRequest updateAdminRequest) {
         AdminResponse adminResponse = adminService.update(updateAdminRequest);
@@ -46,6 +49,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<AdminResponse>> getAdminById(@PathVariable String id) {
         AdminResponse adminResponse = adminService.getById(id);
@@ -57,6 +61,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<AdminResponse>>> getAllAdmins(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -84,6 +89,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<Void>> deleteAdmin(@PathVariable String id) {
         adminService.delete(id);

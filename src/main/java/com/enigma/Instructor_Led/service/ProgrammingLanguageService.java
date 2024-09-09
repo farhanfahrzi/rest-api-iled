@@ -12,6 +12,7 @@ public interface ProgrammingLanguageService {
     ProgrammingLanguageResponse create(CreateProgrammingLanguageRequest createProgrammingLanguageRequest);
     ProgrammingLanguageResponse update(UpdateProgrammingLanguageRequest updateProgrammingLanguageRequest);
     ProgrammingLanguageResponse getById(String id);
+    ProgrammingLanguage getOneById(String id);
     Page<ProgrammingLanguageResponse> getAll(Integer page, Integer size);
     void delete (String id);
 

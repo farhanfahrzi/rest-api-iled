@@ -64,7 +64,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepository.saveAndFlush(schedule);
 
         // Update programming language trainer
-        programmingLanguage.setTrainer(trainer);
+//        programmingLanguage.setTrainer(trainer);
 
         // Create response
         return convertToResponse(schedule);
