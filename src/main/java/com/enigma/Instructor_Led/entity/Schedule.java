@@ -25,7 +25,7 @@ public class Schedule {
 
     @Column(name = "date", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     @Column(name = "topic", nullable = false)

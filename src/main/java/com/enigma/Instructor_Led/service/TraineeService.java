@@ -17,4 +17,6 @@ public interface TraineeService {
     Trainee getOneById(String id);
     Page<TraineeResponse> getAll(Pageable pageable, String name, String email, String nik);
     void delete(String id);
+
+    Trainee getByUserAccountId(String id);
 }

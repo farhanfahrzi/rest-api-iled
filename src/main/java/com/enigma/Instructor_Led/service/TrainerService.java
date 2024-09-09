@@ -17,4 +17,5 @@ public interface TrainerService {
     Page<TrainerResponse> getAll(Pageable pageable, String name, String email);
     void delete(String id);
 
+    Trainer getByUserAccountId(String id);
 }

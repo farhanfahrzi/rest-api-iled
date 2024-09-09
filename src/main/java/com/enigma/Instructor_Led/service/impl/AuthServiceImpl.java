@@ -3,13 +3,11 @@ package com.enigma.Instructor_Led.service.impl;
 import com.enigma.Instructor_Led.constant.TraineeStatus;
 import com.enigma.Instructor_Led.constant.UserRole;
 import com.enigma.Instructor_Led.dto.request.LoginRequest;
+import com.enigma.Instructor_Led.dto.request.RegisterRequest;
 import com.enigma.Instructor_Led.dto.request.RegitserTraineeRequest;
 import com.enigma.Instructor_Led.dto.response.LoginResponse;
 import com.enigma.Instructor_Led.dto.response.RegisterResponse;
-import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
-import com.enigma.Instructor_Led.entity.Role;
-import com.enigma.Instructor_Led.entity.Trainee;
-import com.enigma.Instructor_Led.entity.UserAccount;
+import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.*;
 import com.enigma.Instructor_Led.util.Validation;
@@ -35,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final ProgrammingLanguageService programmingLanguageService;
     private final PasswordEncoder passwordEncoder;
     private final TraineeService traineeService;
+    private final TrainerService trainerService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final Validation validation;
@@ -136,5 +135,38 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public RegisterResponse registerTrainer(RegisterRequest request) {
+        // Cek apakah username sudah ada di database
+        if (userAccountRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
 
+        // Encode password
+        String hashPassword = passwordEncoder.encode(request.getPassword());
+
+        // Ambil role TRAINEE
+        Role role = roleService.getOrSave(UserRole.ROLE_TRAINER);
+
+        // Buat user account baru
+        UserAccount account = UserAccount.builder()
+                .username(request.getUsername())
+                .password(hashPassword)
+                .isEnable(true)
+                .roles(List.of(role))
+                .build();
+
+        // Simpan user account terlebih dahulu untuk generate ID
+        userAccountRepository.saveAndFlush(account);
+
+        Trainer trainer = trainerService.getOneById(request.getId());
+        trainer.setUserAccount(account);
+
+        // Return response registrasi
+        return RegisterResponse.builder()
+                .username(account.getUsername())
+                .roles(account.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .build();
+    }
 }
