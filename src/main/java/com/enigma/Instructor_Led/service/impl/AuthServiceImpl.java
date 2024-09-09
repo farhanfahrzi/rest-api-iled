@@ -44,11 +44,11 @@ public class AuthServiceImpl implements AuthService {
     @Value("${iled.admin.password}")
     private String adminPassword;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @PostConstruct
-    public void initSuperAdmin() {
-        Optional<UserAccount> currentUserSuperAdmin = userAccountRepository.findByUsername(adminUsername);
-        if (currentUserSuperAdmin.isPresent()) return;
+    public void initAdmin() {
+        Optional<UserAccount> currentUserAdmin = userAccountRepository.findByUsername(adminUsername);
+        if (currentUserAdmin.isPresent()) return;
 
         Role trainee = roleService.getOrSave(UserRole.ROLE_TRAINEE);
         Role admin = roleService.getOrSave(UserRole.ROLE_ADMIN);
@@ -60,12 +60,12 @@ public class AuthServiceImpl implements AuthService {
                 .roles(List.of(admin, trainee, trainer))
                 .isEnable(true)
                 .build();
-        userAccountRepository.saveAndFlush(account);
+        userAccountRepository.save(account);
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    @Transactional
     public RegisterResponse register(RegitserTraineeRequest request) {
         // Validasi request
         validation.validate(request);
@@ -93,7 +93,6 @@ public class AuthServiceImpl implements AuthService {
         userAccountRepository.saveAndFlush(account);
 
         // Buat trainee baru
-        ProgrammingLanguage programmingLanguage = programmingLanguageService.getOneById(request.getProgrammingLanguageId());
         Trainee trainee = Trainee.builder()
                 .name(request.getName())
                 .nik(request.getNik())
@@ -101,10 +100,10 @@ public class AuthServiceImpl implements AuthService {
                 .address(request.getAddress())
                 .birthDate(request.getBirthDate())
                 .phoneNumber(request.getPhoneNumber())
-                .programmingLanguage(programmingLanguage)
                 .userAccount(account)
                 .status(TraineeStatus.ACTIVE)
                 .build();
+
 
         // Simpan trainee ke database
         traineeService.createTrainee(trainee);

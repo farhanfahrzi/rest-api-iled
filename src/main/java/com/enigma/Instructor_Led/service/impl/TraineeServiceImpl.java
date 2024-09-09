@@ -6,16 +6,20 @@ import com.enigma.Instructor_Led.dto.request.UpdateTraineeRequest;
 import com.enigma.Instructor_Led.dto.response.TraineeResponse;
 import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
 import com.enigma.Instructor_Led.entity.Trainee;
+import com.enigma.Instructor_Led.entity.UserAccount;
 import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
 import com.enigma.Instructor_Led.repository.TraineeRepository;
+import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
 import com.enigma.Instructor_Led.service.TraineeService;
+import com.enigma.Instructor_Led.service.UserService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +33,9 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeRepository traineeRepository;
     private final ProgrammingLanguageService programmingLanguageService;
     private final Validation validation;
+    private final UserAccountRepository userAccountRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @Override
     public Trainee createTrainee(Trainee trainee) {
@@ -65,17 +72,64 @@ public class TraineeServiceImpl implements TraineeService {
 //        if (traineeOpt.isEmpty()) {
 //            return null; // Or throw an exception
 //        }
-
         Trainee trainee = getOneById(updateTraineeRequest.getId());
+        UserAccount userByContext = userService.getByContext();
+
+        if (!userByContext.getId().equals(trainee.getUserAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not found");
+        }
+
+        if (userAccountRepository.findByUsername(updateTraineeRequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
         trainee.setName(updateTraineeRequest.getName());
         trainee.setNik(updateTraineeRequest.getNik());
         trainee.setBirthDate(updateTraineeRequest.getBirthDate());
         trainee.setAddress(updateTraineeRequest.getAddress());
         trainee.setEmail(updateTraineeRequest.getEmail());
         trainee.setPhoneNumber(updateTraineeRequest.getPhoneNumber());
-        Trainee updatedTrainee = traineeRepository.save(trainee);
+        if (updateTraineeRequest.getProgrammingLanguageId() != null) {
+            ProgrammingLanguage programmingLanguage = programmingLanguageService.getOneById(updateTraineeRequest.getProgrammingLanguageId());
+            trainee.setProgrammingLanguage(programmingLanguage); // Update programmingLanguage jika ada
+        }
+        // Update UserAccount (username dan password)
+        UserAccount userAccount = trainee.getUserAccount();
+        boolean isPasswordUpdated = false;
+//        if (!userAccount.getUsername().equals(updateTraineeRequest.getUsername())) {
+//            // Cek apakah username baru sudah ada
+//            if (userAccountRepository.findByUsername(updateTraineeRequest.getUsername()).isPresent()) {
+//                throw new IllegalArgumentException("Username already exists");
+//            }
+//            userAccount.setUsername(updateTraineeRequest.getUsername());
+//        }
+//
+//        // Jika password diisi, update password
+//        if (updateTraineeRequest.getPassword() != null && !updateTraineeRequest.getPassword().isEmpty()) {
+//            String hashedPassword = passwordEncoder.encode(updateTraineeRequest.getPassword());
+//            userAccount.setPassword(hashedPassword);
+//        }
+        // Update username jika ada perubahan
+        if (!userAccount.getUsername().equals(updateTraineeRequest.getUsername())) {
+            // Cek apakah username baru sudah ada
+            if (userAccountRepository.findByUsername(updateTraineeRequest.getUsername()).isPresent()) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+            userAccount.setUsername(updateTraineeRequest.getUsername());
+        }
 
-        return mapToResponse(updatedTrainee);
+        // Update password jika disertakan
+        if (updateTraineeRequest.getPassword() != null && !updateTraineeRequest.getPassword().isEmpty()) {
+            String hashedPassword = passwordEncoder.encode(updateTraineeRequest.getPassword());
+            userAccount.setPassword(hashedPassword);
+            isPasswordUpdated = true; // Tandai password telah diperbarui
+        }
+
+        // Simpan perubahan ke database
+        traineeRepository.saveAndFlush(trainee);
+        userAccountRepository.saveAndFlush(userAccount);
+
+        return mappToResponse(trainee, isPasswordUpdated);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -130,8 +184,26 @@ public class TraineeServiceImpl implements TraineeService {
                 .address(trainee.getAddress())
                 .email(trainee.getEmail())
                 .phoneNumber(trainee.getPhoneNumber())
-                .programmingLanguage(trainee.getProgrammingLanguage().getProgrammingLanguage())
+                .programmingLanguage(trainee.getProgrammingLanguage() != null ? trainee.getProgrammingLanguage().getId() : null) // Mengembalikan programmingLanguage jika ada
+                .username(trainee.getUserAccount().getUsername()) // Tambahkan username
+                .status(trainee.getStatus())
+                .build();
+    }
+
+    private TraineeResponse mappToResponse(Trainee trainee, boolean isPasswordUpdated) {
+        return TraineeResponse.builder()
+                .id(trainee.getId())
+                .name(trainee.getName())
+                .nik(trainee.getNik())
+                .birthDate(trainee.getBirthDate())
+                .address(trainee.getAddress())
+                .email(trainee.getEmail())
+                .phoneNumber(trainee.getPhoneNumber())
+                .programmingLanguage(trainee.getProgrammingLanguage() != null ? trainee.getProgrammingLanguage().getId() : null) // Mengembalikan programmingLanguage jika ada
+                .username(trainee.getUserAccount().getUsername()) // Tambahkan username
+                .isPasswordUpdated(isPasswordUpdated)
                 .status(trainee.getStatus())
                 .build();
     }
 }
+

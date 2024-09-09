@@ -26,7 +26,7 @@ public class TraineeController {
 
     private final TraineeService traineeService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'TRAINEE')")
     @PostMapping
     public ResponseEntity<CommonResponse<TraineeResponse>> createNewTrainee(@RequestBody CreateTraineeRequest traineeRequest) {
         TraineeResponse trainee = traineeService.create(traineeRequest);
@@ -39,7 +39,7 @@ public class TraineeController {
                 .status(HttpStatus.CREATED)
                 .body(commonResponse);
     }
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TRAINEE')")
     @PutMapping
     public ResponseEntity<CommonResponse<TraineeResponse>> updateTrainee(@RequestBody UpdateTraineeRequest updateTraineeRequest) {
         TraineeResponse traineeResponse = traineeService.update(updateTraineeRequest);
@@ -51,7 +51,7 @@ public class TraineeController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TRAINEE')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<TraineeResponse>> getTraineeById(@PathVariable String id) {
         TraineeResponse traineeResponse = traineeService.getById(id);
@@ -63,7 +63,7 @@ public class TraineeController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<TraineeResponse>>> getAllTrainees(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -94,7 +94,7 @@ public class TraineeController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<Void>> deleteTrainee(@PathVariable String id) {
         traineeService.delete(id);

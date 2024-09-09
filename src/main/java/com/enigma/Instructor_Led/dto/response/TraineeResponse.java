@@ -22,4 +22,6 @@ public class TraineeResponse {
     private String phoneNumber;
     private String programmingLanguage;
     private TraineeStatus status;
+    private String username;
+    private boolean isPasswordUpdated;
 }

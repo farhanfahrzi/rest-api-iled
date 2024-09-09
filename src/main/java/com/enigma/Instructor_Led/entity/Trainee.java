@@ -44,7 +44,7 @@ public class Trainee {
     private String phoneNumber;
 
     @ManyToOne
-    @JoinColumn(name = "programming_language_id", nullable = false)
+    @JoinColumn(name = "programming_language_id", nullable = true)
     private ProgrammingLanguage programmingLanguage;
 
     @Enumerated(EnumType.STRING)

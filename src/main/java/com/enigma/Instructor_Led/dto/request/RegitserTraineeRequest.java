@@ -46,6 +46,4 @@ public class RegitserTraineeRequest {
     @NotBlank(message = "Phone Number is required")
     private String phoneNumber;
 
-    @NotBlank(message = "Programming Language is required")
-    private String programmingLanguageId;
 }
