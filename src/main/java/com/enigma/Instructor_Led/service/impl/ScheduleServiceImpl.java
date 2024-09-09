@@ -4,7 +4,7 @@ import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
 import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.entity.*;
 import com.enigma.Instructor_Led.repository.*;
-import com.enigma.Instructor_Led.service.ScheduleService;
+import com.enigma.Instructor_Led.service.*;
 import com.enigma.Instructor_Led.specification.ScheduleSpecification;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
-    private final TraineeRepository traineeRepository;
-    private final TrainerRepository trainerRepository;
-    private final ProgrammingLanguageRepository programmingLanguageRepository;
-    private final DocumentationImageRepository documentationImageRepository;
+    private final TraineeService traineeService;
+    private final TrainerService trainerService;
+    private final ProgrammingLanguageService programmingLanguageService;
+    private final DocumentationImageService documentationImageService;
+    private final UserService userService;
 
     private final Validation validation;
 
@@ -43,14 +42,15 @@ public class ScheduleServiceImpl implements ScheduleService {
         validation.validate(request);
 
         // Find trainer from request
-        Trainer trainer = trainerRepository.findById(request.getTrainerId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainer not found")
-        );
+        Trainer trainer = trainerService.getOneById(request.getTrainerId());
 
         // Find programming language from request
-        ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(request.getProgrammingLanguageId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Programming Language not found")
-        );
+        ProgrammingLanguage programmingLanguage = programmingLanguageService.getOneById(request.getProgrammingLanguageId());
+
+        // Checking if the trainer actually have corresponding programming language
+        if (!trainer.getProgrammingLanguages().contains(programmingLanguage)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainer ID and Programming Language ID doesn't match");
+        }
 
         // Create schedule from request
         Schedule schedule = Schedule.builder()
@@ -100,8 +100,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Set schedule id for documentation image
         List<DocumentationImage> documentationImages = request.getId().stream().map(
                 id -> {
-                    DocumentationImage documentationImage = documentationImageRepository.findById(id).orElseThrow(
-                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Documentation not found"));
+                    DocumentationImage documentationImage = documentationImageService.getById(id);
                     documentationImage.setSchedule(schedule);
                     return documentationImage;
                 }
@@ -179,22 +178,34 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getAllByTraineeId(String id) {
-        Trainee trainee = traineeRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainee not found")
-        );
-        List<Schedule> schedules = scheduleRepository.findAllByTraineeId(trainee.getId());
-        return schedules.stream().map(this::convertToResponse).toList();
+    public Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String id) {
+        Trainee trainee = traineeService.getOneById(id);
+
+        UserAccount userAccount = userService.getByContext();
+        if (!userAccount.getId().equals(trainee.getUserAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You don't have permission to get schedules for this trainee");
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTraineeId(pageable, trainee.getId());
+        return pagedSchedules.map(this::convertToResponse);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getAllByTrainerId(String id) {
-        Trainer trainer = trainerRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainer not found")
-        );
-        List<Schedule> schedules = scheduleRepository.findAllByTrainerId(trainer.getId());
-        return schedules.stream().map(this::convertToResponse).toList();
+    public Page<ScheduleResponse> getAllByTrainerId(Integer page, Integer size, String id) {
+        Trainer trainer = trainerService.getOneById(id);
+
+        UserAccount userAccount = userService.getByContext();
+        if (!userAccount.getId().equals(trainer.getUserAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You don't have permission to get schedules for this trainer");
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTrainerId(pageable, trainer.getId());
+        return pagedSchedules.map(this::convertToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -3,6 +3,7 @@ package com.enigma.Instructor_Led.controller;
 
 import com.enigma.Instructor_Led.constant.PathUrl;
 import com.enigma.Instructor_Led.dto.request.LoginRequest;
+import com.enigma.Instructor_Led.dto.request.RegisterRequest;
 import com.enigma.Instructor_Led.dto.request.RegitserTraineeRequest;
 import com.enigma.Instructor_Led.dto.response.CommonResponse;
 import com.enigma.Instructor_Led.dto.response.LoginResponse;
@@ -41,6 +42,17 @@ public class AuthController {
                 .statusCode(HttpStatus.CREATED.value())
                 .message("Login successfully")
                 .data(loginResponse)
+                .build();
+        return ResponseEntity.status(201).body(response);
+    }
+
+    @PostMapping(path = "/registertrainer")
+    public ResponseEntity<CommonResponse<?>> registerTrainer(@RequestBody RegisterRequest request){
+        RegisterResponse register = authService.registerTrainer(request);
+        CommonResponse<RegisterResponse> response = CommonResponse.<RegisterResponse>builder()
+                .statusCode(HttpStatus.CREATED.value())
+                .message("Register successfully")
+                .data(register)
                 .build();
         return ResponseEntity.status(201).body(response);
     }

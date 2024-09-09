@@ -118,7 +118,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllSchedules(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -161,30 +161,52 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/trainee/{id}")
+    @GetMapping(path = "/trainee")
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTraineeId(
-            @PathVariable String id
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "id") String id
     ) {
-        List<ScheduleResponse> schedules = scheduleService.getAllByTraineeId(id);
+        Page<ScheduleResponse> pagedSchedules = scheduleService.getAllByTraineeId(page, size, id);
+
         CommonResponse<List<ScheduleResponse>> response = CommonResponse
                 .<List<ScheduleResponse>>builder()
                 .message("Schedule fetched successfully")
                 .statusCode(HttpStatus.OK.value())
-                .data(schedules)
+                .data(pagedSchedules.getContent())
+                .paging(PagingResponse.builder()
+                        .totalPages(pagedSchedules.getTotalPages())
+                        .totalElement(pagedSchedules.getTotalElements())
+                        .page(page)
+                        .size(size)
+                        .hasNext(pagedSchedules.hasNext())
+                        .hasPrevious(pagedSchedules.hasPrevious())
+                        .build())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/trainer/{id}")
+    @GetMapping(path = "/trainer")
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTrainerId(
-            @PathVariable String id
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "id") String id
     ) {
-        List<ScheduleResponse> schedules = scheduleService.getAllByTrainerId(id);
+        Page<ScheduleResponse> pagedSchedules = scheduleService.getAllByTrainerId(page, size, id);
+
         CommonResponse<List<ScheduleResponse>> response = CommonResponse
                 .<List<ScheduleResponse>>builder()
                 .message("Schedule fetched successfully")
                 .statusCode(HttpStatus.OK.value())
-                .data(schedules)
+                .data(pagedSchedules.getContent())
+                .paging(PagingResponse.builder()
+                        .totalPages(pagedSchedules.getTotalPages())
+                        .totalElement(pagedSchedules.getTotalElements())
+                        .page(page)
+                        .size(size)
+                        .hasNext(pagedSchedules.hasNext())
+                        .hasPrevious(pagedSchedules.hasPrevious())
+                        .build())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
