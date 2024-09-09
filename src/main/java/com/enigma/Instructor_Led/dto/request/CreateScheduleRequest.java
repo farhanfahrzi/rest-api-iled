@@ -22,6 +22,9 @@ public class CreateScheduleRequest {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private Date date;
 
+    @NotBlank(message = "Link schedule is required")
+    private String link;
+
     @NotBlank(message = "Topic is required")
     private String topic;
 

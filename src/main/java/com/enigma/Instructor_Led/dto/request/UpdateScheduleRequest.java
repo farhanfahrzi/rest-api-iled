@@ -28,12 +28,16 @@ public class UpdateScheduleRequest {
     @NotBlank(message = "Topic is required")
     private String topic;
 
+    @NotBlank(message = "Link schedule is required")
+    private String link;
+
     @NotBlank(message = "Trainer is required")
     private String trainerId;
 
     @NotBlank(message = "Language is required")
     private String programmingLanguageId;
 
-    @NotBlank(message = "Trainee is required")
-    private List<String> traineeIds;
+    // ini untuk apa ??
+//    @NotBlank(message = "Trainee is required")
+//    private List<String> traineeIds;
 }

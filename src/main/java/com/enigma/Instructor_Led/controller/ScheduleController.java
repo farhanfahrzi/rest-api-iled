@@ -3,11 +3,14 @@ package com.enigma.Instructor_Led.controller;
 import com.enigma.Instructor_Led.dto.request.CreateScheduleRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateDocumentationImageRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateScheduleRequest;
+import com.enigma.Instructor_Led.dto.request.UploadImagesRequest;
 import com.enigma.Instructor_Led.dto.response.CommonResponse;
 import com.enigma.Instructor_Led.dto.response.DocumentationImageResponse;
 import com.enigma.Instructor_Led.dto.response.PagingResponse;
 import com.enigma.Instructor_Led.dto.response.ScheduleResponse;
+import com.enigma.Instructor_Led.entity.DocumentationImage;
 import com.enigma.Instructor_Led.entity.Schedule;
+import com.enigma.Instructor_Led.service.DocumentationImageService;
 import com.enigma.Instructor_Led.service.ImageKitService;
 import com.enigma.Instructor_Led.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +24,52 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v1/schedules")
 public class ScheduleController {
     private final ScheduleService scheduleService;
+    private final DocumentationImageService documentationImageService;
     private final ImageKitService imageKitService;
+
+    // untuk upload image leata documentasiimage
+    @PostMapping("/{id}/upload-images")
+    public ResponseEntity<CommonResponse<List<DocumentationImageResponse>>> uploadImages(
+            @PathVariable String id,
+            @RequestParam("images") List<MultipartFile> images
+    ) {
+        UploadImagesRequest request = new UploadImagesRequest();
+        request.setScheduleId(id);
+        request.setImages(images);
+
+        try {
+            List<DocumentationImageResponse> uploadedImages = documentationImageService.uploadImages(request);
+
+            CommonResponse<List<DocumentationImageResponse>> response = CommonResponse
+                    .<List<DocumentationImageResponse>>builder()
+                    .message("Images uploaded successfully")
+                    .statusCode(HttpStatus.CREATED.value())
+                    .data(uploadedImages)
+                    .build();
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (IOException e) {
+            CommonResponse<List<DocumentationImageResponse>> response = CommonResponse
+                    .<List<DocumentationImageResponse>>builder()
+                    .message("Failed to upload images")
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .data(null)
+                    .build();
+
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
@@ -60,41 +101,41 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
-    @PutMapping(path = "/docs")
-    public ResponseEntity<CommonResponse<ScheduleResponse>> updateDocumentation(
-            @RequestBody UpdateDocumentationImageRequest request
-    ) {
-        ScheduleResponse schedule = scheduleService.updateDocumentation(request);
-        CommonResponse<ScheduleResponse> response = CommonResponse
-                .<ScheduleResponse>builder()
-                .message("Schedule updated successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(schedule)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
+//    @PutMapping(path = "/docs")
+//    public ResponseEntity<CommonResponse<ScheduleResponse>> updateDocumentation(
+//            @RequestBody UpdateDocumentationImageRequest request
+//    ) {
+//        ScheduleResponse schedule = scheduleService.updateDocumentation(request);
+//        CommonResponse<ScheduleResponse> response = CommonResponse
+//                .<ScheduleResponse>builder()
+//                .message("Schedule updated successfully")
+//                .statusCode(HttpStatus.OK.value())
+//                .data(schedule)
+//                .build();
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
-    @PostMapping(path = "/docs-upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<CommonResponse<DocumentationImageResponse>> uploadImage(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("id") String id
-
-    ) throws IOException {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body(null); // Handle case when the file is empty
-        }
-        // DocumentationImageResponse imageResponse = imageKitService.uploadImage(file, id);
-        DocumentationImageResponse imageResponse = imageKitService.uploadDocs(file);
-        CommonResponse<DocumentationImageResponse> response = CommonResponse
-                .<DocumentationImageResponse>builder()
-                .message("Documentation uploaded successfully")
-                .statusCode(HttpStatus.OK.value())
-                .data(imageResponse)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
+//    @PostMapping(path = "/docs-upload", consumes = {"multipart/form-data"})
+//    public ResponseEntity<CommonResponse<DocumentationImageResponse>> uploadImage(
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam("id") String id
+//
+//    ) throws IOException {
+//        if (file.isEmpty()) {
+//            return ResponseEntity.badRequest().body(null); // Handle case when the file is empty
+//        }
+//        // DocumentationImageResponse imageResponse = imageKitService.uploadImage(file, id);
+//        DocumentationImageResponse imageResponse = imageKitService.uploadDocs(file);
+//        CommonResponse<DocumentationImageResponse> response = CommonResponse
+//                .<DocumentationImageResponse>builder()
+//                .message("Documentation uploaded successfully")
+//                .statusCode(HttpStatus.OK.value())
+//                .data(imageResponse)
+//                .build();
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/{id}")
@@ -186,6 +227,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_TRAINER')")
     @GetMapping(path = "/trainer")
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTrainerId(
             @RequestParam(name = "page", defaultValue = "0") Integer page,

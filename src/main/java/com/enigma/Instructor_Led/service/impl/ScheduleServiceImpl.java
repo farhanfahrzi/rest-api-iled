@@ -30,7 +30,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final ProgrammingLanguageService programmingLanguageService;
-    private final DocumentationImageService documentationImageService;
     private final UserService userService;
 
     private final Validation validation;
@@ -56,6 +55,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         Schedule schedule = Schedule.builder()
                 .date(request.getDate())
                 .topic(request.getTopic())
+                .link(request.getLink())
                 .trainer(trainer)
                 .programmingLanguage(programmingLanguage)
                 .documentationImages(new ArrayList<>())
@@ -76,38 +76,19 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Validation
         validation.validate(request);
 
+        // Find programming language from request
+        ProgrammingLanguage programmingLanguage = programmingLanguageService.getOneById(request.getProgrammingLanguageId());
+        Trainer trainer = trainerService.getOneById(request.getTrainerId());
+
         // Find schedule from request
         Schedule schedule = scheduleRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
-
+        schedule.setDate(request.getDate());
+        schedule.setTopic(request.getTopic());
+        schedule.setLink(request.getLink());
+        schedule.setProgrammingLanguage(programmingLanguage);
+        schedule.setTrainer(trainer);
         // Update existing schedule
-        Schedule updatedSchedule = scheduleRepository.saveAndFlush(schedule);
-
-        // Create response
-        return convertToResponse(updatedSchedule);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ScheduleResponse updateDocumentation(UpdateDocumentationImageRequest request) {
-        // Validation
-        validation.validate(request);
-
-        // Find schedule
-        Schedule schedule = scheduleRepository.findById(request.getScheduleId()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schedule not found"));
-
-        // Set schedule id for documentation image
-        List<DocumentationImage> documentationImages = request.getId().stream().map(
-                id -> {
-                    DocumentationImage documentationImage = documentationImageService.getById(id);
-                    documentationImage.setSchedule(schedule);
-                    return documentationImage;
-                }
-        ).toList();
-
-        // Update documentation image for schedule
-        schedule.getDocumentationImages().addAll(documentationImages);
         Schedule updatedSchedule = scheduleRepository.saveAndFlush(schedule);
 
         // Create response
@@ -176,10 +157,26 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleRepository.findAll(specification, pageable);
     }
 
+//    @Transactional(readOnly = true)
+//    @Override
+//    public Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String id) {
+//        Trainee trainee = traineeService.getOneById(id);
+//
+//        UserAccount userAccount = userService.getByContext();
+//        if (!userAccount.getId().equals(trainee.getUserAccount().getId())) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+//                    "You don't have permission to get schedules for this trainee");
+//        }
+//
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTraineeId(pageable, trainee.getId());
+//        return pagedSchedules.map(this::convertToResponse);
+//    }
+
     @Transactional(readOnly = true)
     @Override
-    public Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String id) {
-        Trainee trainee = traineeService.getOneById(id);
+    public Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String traineeId) {
+        Trainee trainee = traineeService.getOneById(traineeId);
 
         UserAccount userAccount = userService.getByContext();
         if (!userAccount.getId().equals(trainee.getUserAccount().getId())) {
@@ -187,10 +184,16 @@ public class ScheduleServiceImpl implements ScheduleService {
                     "You don't have permission to get schedules for this trainee");
         }
 
+        ProgrammingLanguage programmingLanguage = trainee.getProgrammingLanguage();
+        if (programmingLanguage == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Trainee has no programming language assigned");
+        }
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTraineeId(pageable, trainee.getId());
+        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTraineeIdAndProgrammingLanguageId(pageable, traineeId, programmingLanguage.getId());
         return pagedSchedules.map(this::convertToResponse);
     }
+
 
     @Transactional(readOnly = true)
     @Override
@@ -223,6 +226,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .id(schedule.getId())
                 .date(schedule.getDate())
                 .topic(schedule.getTopic())
+                .linkSchedule(schedule.getLink())
                 .trainerId(schedule.getTrainer().getId())
                 .programmingLanguageId(schedule.getProgrammingLanguage().getId())
                 .documentationImages(schedule.getDocumentationImages().stream().map(

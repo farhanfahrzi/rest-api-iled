@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class DocumentationImageResponse {
-    private String id;
-    private String link;
-    private String scheduleId;
-    private List<String> links;
+public class ImageUploadResponse {
+    private String fileId;
+    private String name;
+    private String url;
+    private String thumbnailUrl;
 }

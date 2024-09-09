@@ -31,6 +31,9 @@ public class Schedule {
     @Column(name = "topic", nullable = false)
     private String topic;
 
+    @Column(name = "link_schedule", nullable = false)
+    private String link;
+
     @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
     private List<DocumentationImage> documentationImages;
 
