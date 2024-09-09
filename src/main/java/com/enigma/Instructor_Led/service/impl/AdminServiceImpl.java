@@ -11,6 +11,7 @@ import com.enigma.Instructor_Led.repository.AdminRepository;
 import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.AdminService;
 import com.enigma.Instructor_Led.service.RoleService;
+import com.enigma.Instructor_Led.service.UserService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final UserAccountRepository userAccountRepository;
     private final RoleService roleService;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final Validation validation;
 
@@ -72,9 +75,18 @@ public class AdminServiceImpl implements AdminService {
         return mapToResponse(savedAdmin);
     }
 
+    @Transactional
     @Override
     public AdminResponse update(UpdateAdminRequest updateAdminRequest) {
         validation.validate(updateAdminRequest);
+
+        Admin admin = getOneById(updateAdminRequest.getId());
+
+        UserAccount userByContext = userService.getByContext();
+        if (admin.getUserAccount() == null || !userByContext.getId().equals(admin.getUserAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not found");
+        }
+
 
         if (userAccountRepository.findByUsername(updateAdminRequest.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
@@ -97,8 +109,6 @@ public class AdminServiceImpl implements AdminService {
         // Simpan user account terlebih dahulu untuk generate ID
         userAccountRepository.saveAndFlush(account);
 
-
-        Admin admin = getOneById(updateAdminRequest.getId());
         admin.setName(updateAdminRequest.getName());
         admin.setEmail(updateAdminRequest.getEmail());
         admin.setPhoneNumber(updateAdminRequest.getPhoneNumber());

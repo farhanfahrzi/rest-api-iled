@@ -13,6 +13,7 @@ import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
 import com.enigma.Instructor_Led.service.RoleService;
 import com.enigma.Instructor_Led.service.TrainerService;
+import com.enigma.Instructor_Led.service.UserService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerRepository trainerRepository;
     private final UserAccountRepository userAccountRepository;
     private final RoleService roleService;
+    private final UserService userService;
     private final ProgrammingLanguageService programmingLanguageService;
     private final Validation validation;
     private final PasswordEncoder passwordEncoder;
@@ -68,6 +70,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .birthDate(createTrainerRequest.getBirthDate())
                 .phoneNumber(createTrainerRequest.getPhoneNumber())
                 .address(createTrainerRequest.getAddress())
+                .userAccount(account)
                 .build();
 
         List<ProgrammingLanguage> programmingLanguages = createTrainerRequest.getProgrammingLanguages().stream()
@@ -84,13 +87,18 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public TrainerResponse update(UpdateTrainerRequest updateTrainerRequest) {
         validation.validate(updateTrainerRequest);
+
+        Trainer trainer = getOneById(updateTrainerRequest.getId());
+        UserAccount userByContext = userService.getByContext();
+        if (!userByContext.getId().equals(trainer.getUserAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not found");
+        }
+
         if (userAccountRepository.findByUsername(updateTrainerRequest.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        // Encode password
         String hashPassword = passwordEncoder.encode(updateTrainerRequest.getPassword());
-
         Role role = roleService.getOrSave(UserRole.ROLE_TRAINER);
         UserAccount account = UserAccount.builder()
                 .username(updateTrainerRequest.getUsername())
@@ -101,8 +109,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         userAccountRepository.saveAndFlush(account);
 
-        Trainer trainer = getOneById(updateTrainerRequest.getId());
-
+        // Update trainer details
         trainer.setName(updateTrainerRequest.getName());
         trainer.setEmail(updateTrainerRequest.getEmail());
         trainer.setBirthDate(updateTrainerRequest.getBirthDate());
@@ -110,15 +117,25 @@ public class TrainerServiceImpl implements TrainerService {
         trainer.setAddress(updateTrainerRequest.getAddress());
         trainer.setUserAccount(account);
 
-        List<ProgrammingLanguage> programmingLanguages = updateTrainerRequest.getProgrammingLanguages().stream()
+        List<ProgrammingLanguage> currentLanguages = trainer.getProgrammingLanguages();
+        List<ProgrammingLanguage> newLanguages = updateTrainerRequest.getProgrammingLanguages().stream()
                 .map(programmingLanguageService::getOneById)
                 .toList();
 
-        trainer.setProgrammingLanguages(programmingLanguages);
-        Trainer updatedTrainer = trainerRepository.save(trainer);
+        currentLanguages.removeIf(existingLanguage ->
+                newLanguages.stream().noneMatch(newLanguage -> newLanguage.getId().equals(existingLanguage.getId()))
+        );
 
+        newLanguages.stream()
+                .filter(newLanguage ->
+                        currentLanguages.stream().noneMatch(existingLanguage -> existingLanguage.getId().equals(newLanguage.getId()))
+                )
+                .forEach(currentLanguages::add);
+        trainer.setProgrammingLanguages(currentLanguages);
+        Trainer updatedTrainer = trainerRepository.save(trainer);
         return mapToResponse(updatedTrainer);
     }
+
 
     @Transactional(readOnly = true)
     @Override
