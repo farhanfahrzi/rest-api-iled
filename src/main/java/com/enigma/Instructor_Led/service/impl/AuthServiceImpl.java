@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
                 .roles(List.of(admin, trainee, trainer))
                 .isEnable(true)
                 .build();
-        userAccountRepository.save(account);
+        userAccountRepository.saveAndFlush(account);
     }
 
 

@@ -34,4 +34,5 @@ public class Role {
     @JsonIgnore
     @ManyToMany(mappedBy = "roles")
     private List<UserAccount> userAccounts;
+
 }

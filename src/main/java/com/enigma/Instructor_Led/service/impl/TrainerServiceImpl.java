@@ -2,6 +2,7 @@ package com.enigma.Instructor_Led.service.impl;
 
 import com.enigma.Instructor_Led.dto.request.CreateTrainerRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateTrainerRequest;
+import com.enigma.Instructor_Led.dto.response.ProgrammingLanguageResponse;
 import com.enigma.Instructor_Led.dto.response.TrainerResponse;
 import com.enigma.Instructor_Led.entity.ProgrammingLanguage;
 import com.enigma.Instructor_Led.entity.Schedule;
@@ -119,8 +120,11 @@ public class TrainerServiceImpl implements TrainerService {
 
 
     private TrainerResponse mapToResponse(Trainer trainer) {
-        List<String> programmingLanguages = trainer.getProgrammingLanguages().stream()
-                .map(ProgrammingLanguage::getProgrammingLanguage)
+        List<ProgrammingLanguageResponse> programmingLanguageResponses = trainer.getProgrammingLanguages().stream()
+                .map(programmingLanguage -> ProgrammingLanguageResponse.builder()
+                        .id(programmingLanguage.getId())
+                        .programmingLanguage(programmingLanguage.getProgrammingLanguage())
+                        .build())
                 .collect(Collectors.toList());
 
         return TrainerResponse.builder()
@@ -131,7 +135,8 @@ public class TrainerServiceImpl implements TrainerService {
                 .phoneNumber(trainer.getPhoneNumber())
                 .address(trainer.getAddress())
                 .userAccountId(trainer.getUserAccount() != null ? trainer.getUserAccount().getId() : null)
-                .programmingLanguages(programmingLanguages)
+                .programmingLanguages(programmingLanguageResponses)
                 .build();
     }
+
 }
