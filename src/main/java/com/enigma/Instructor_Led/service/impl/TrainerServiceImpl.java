@@ -1,32 +1,22 @@
 package com.enigma.Instructor_Led.service.impl;
 
-import com.enigma.Instructor_Led.constant.UserRole;
 import com.enigma.Instructor_Led.dto.request.CreateTrainerRequest;
 import com.enigma.Instructor_Led.dto.request.UpdateTrainerRequest;
 import com.enigma.Instructor_Led.dto.response.ProgrammingLanguageResponse;
 import com.enigma.Instructor_Led.dto.response.TrainerResponse;
 import com.enigma.Instructor_Led.entity.*;
-import com.enigma.Instructor_Led.repository.ProgrammingLanguageRepository;
-import com.enigma.Instructor_Led.repository.ScheduleRepository;
 import com.enigma.Instructor_Led.repository.TrainerRepository;
-import com.enigma.Instructor_Led.repository.UserAccountRepository;
 import com.enigma.Instructor_Led.service.ProgrammingLanguageService;
-import com.enigma.Instructor_Led.service.RoleService;
 import com.enigma.Instructor_Led.service.TrainerService;
-import com.enigma.Instructor_Led.service.UserService;
 import com.enigma.Instructor_Led.util.Validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,11 +112,6 @@ public class TrainerServiceImpl implements TrainerService {
         trainerRepository.deleteById(id);
     }
 
-    @Transactional
-    @Override
-    public Trainer getByUserAccountId(String id) {
-        return trainerRepository.findByUserAccountId(id);
-    }
 
     private TrainerResponse mapToResponse(Trainer trainer) {
         List<ProgrammingLanguageResponse> programmingLanguageResponses = trainer.getProgrammingLanguages().stream()

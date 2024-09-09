@@ -21,7 +21,7 @@ public interface ScheduleService {
     Schedule getById(String id);
     List<Schedule> getAll();
     Page<Schedule> getAll(Integer size, Integer page, String language, String startDate, String endDate);
-    List<ScheduleResponse> getAllByTraineeId(String id);
-    List<ScheduleResponse> getAllByTrainerId(String id);
+    Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String id);
+    Page<ScheduleResponse> getAllByTrainerId(Integer page, Integer size, String id);
     void delete(String id);
 }

@@ -178,7 +178,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getAllByTraineeId(String id) {
+    public Page<ScheduleResponse> getAllByTraineeId(Integer page, Integer size, String id) {
         Trainee trainee = traineeService.getOneById(id);
 
         UserAccount userAccount = userService.getByContext();
@@ -187,13 +187,14 @@ public class ScheduleServiceImpl implements ScheduleService {
                     "You don't have permission to get schedules for this trainee");
         }
 
-        List<Schedule> schedules = scheduleRepository.findAllByTraineeId(trainee.getId());
-        return schedules.stream().map(this::convertToResponse).toList();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTraineeId(pageable, trainee.getId());
+        return pagedSchedules.map(this::convertToResponse);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<ScheduleResponse> getAllByTrainerId(String id) {
+    public Page<ScheduleResponse> getAllByTrainerId(Integer page, Integer size, String id) {
         Trainer trainer = trainerService.getOneById(id);
 
         UserAccount userAccount = userService.getByContext();
@@ -202,8 +203,9 @@ public class ScheduleServiceImpl implements ScheduleService {
                     "You don't have permission to get schedules for this trainer");
         }
 
-        List<Schedule> schedules = scheduleRepository.findAllByTrainerId(trainer.getId());
-        return schedules.stream().map(this::convertToResponse).toList();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Schedule> pagedSchedules = scheduleRepository.findAllByTrainerId(pageable, trainer.getId());
+        return pagedSchedules.map(this::convertToResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)

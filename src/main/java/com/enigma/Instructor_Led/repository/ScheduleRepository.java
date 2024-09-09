@@ -14,13 +14,24 @@ import java.util.List;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
-    List<Schedule> findAllByTrainerId(String id);
+    Page<Schedule> findAllByTrainerId(Pageable pageable, String id);
 
     @Query(value = "SELECT s.* FROM t_schedule s " +
             "JOIN t_programming_language pl ON s.programming_language_id = pl.id " +
             "JOIN m_trainee t ON t.programming_language_id = pl.id " +
             "WHERE t.id = :id", nativeQuery = true)
     List<Schedule> findAllByTraineeId(String id);
+
+    @Query(value = "SELECT s.* FROM t_schedule s " +
+            "JOIN t_programming_language pl ON s.programming_language_id = pl.id " +
+            "JOIN m_trainee t ON t.programming_language_id = pl.id " +
+            "WHERE t.id = :id",
+            countQuery = "SELECT COUNT(*) FROM t_schedule s " +
+                    "JOIN t_programming_language pl ON s.programming_language_id = pl.id " +
+                    "JOIN m_trainee t ON t.programming_language_id = pl.id " +
+                    "WHERE t.id = :id",
+    nativeQuery = true)
+    Page<Schedule> findAllByTraineeId(Pageable pageable, @Param("id") String id);
 
     @Query(value = "SELECT s.* FROM t_schedule s JOIN t_programming_language pl " +
             "ON s.programming_language_id = pl.id WHERE s.date BETWEEN :startDate AND :endDate " +

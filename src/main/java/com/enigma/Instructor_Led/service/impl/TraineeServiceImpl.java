@@ -120,11 +120,6 @@ public class TraineeServiceImpl implements TraineeService {
         traineeRepository.delete(trainee);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public Trainee getByUserAccountId(String id) {
-        return traineeRepository.findByUserAccountId(id);
-    }
 
     private TraineeResponse mapToResponse(Trainee trainee) {
         return TraineeResponse.builder()
