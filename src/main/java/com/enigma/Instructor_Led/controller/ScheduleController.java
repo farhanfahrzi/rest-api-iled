@@ -202,6 +202,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_TRAINEE')")
     @GetMapping(path = "/trainee")
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllByTraineeId(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
