@@ -107,6 +107,12 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .trainerId(attendance.getSchedule().getTrainer().getId())
                     .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage()!= null ?
                             attendance.getSchedule().getProgrammingLanguage().getId() : null)
+                    .documentationImages(attendance.getSchedule().getDocumentationImages().stream().map(
+                                    doc -> DocumentationImageResponse.builder()
+                                            .id(doc.getId())
+                                            .link(doc.getLink())
+                                            .build())
+                            .toList())
                     .build();
 
             return AttendanceResponse.builder()
