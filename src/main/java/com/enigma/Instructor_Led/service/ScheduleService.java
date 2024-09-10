@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface ScheduleService {
     ScheduleResponse create(CreateScheduleRequest request);
     ScheduleResponse update(UpdateScheduleRequest request);
-    ScheduleResponse updateDocumentation(UpdateDocumentationImageRequest request);
+   // ScheduleResponse updateDocumentation(UpdateDocumentationImageRequest request);
     Schedule getById(String id);
     List<Schedule> getAll();
     Page<Schedule> getAll(Integer size, Integer page, String language, String startDate, String endDate);

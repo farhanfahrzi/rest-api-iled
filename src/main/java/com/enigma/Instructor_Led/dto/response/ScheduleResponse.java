@@ -18,6 +18,7 @@ public class ScheduleResponse {
     private String id;
     private Date date;
     private String topic;
+    private String linkSchedule;
     private String trainerId;
     private String programmingLanguageId;
     private List<DocumentationImageResponse> documentationImages;

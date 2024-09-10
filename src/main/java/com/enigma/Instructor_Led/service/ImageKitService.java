@@ -10,4 +10,5 @@ import java.io.IOException;
 public interface ImageKitService {
     DocumentationImageResponse uploadImage(MultipartFile file, String scheduleId) throws IOException;
     DocumentationImageResponse uploadDocs(MultipartFile file) throws IOException;
+
 }
