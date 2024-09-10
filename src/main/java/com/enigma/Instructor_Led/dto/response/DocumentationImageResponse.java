@@ -15,5 +15,5 @@ public class DocumentationImageResponse {
     private String id;
     private String link;
     private String scheduleId;
-    private List<String> links;
+//    private List<String> links;
 }

@@ -114,12 +114,11 @@ public class DocumentationImageServiceImpl implements DocumentationImageService 
 
     // Helper method to convert DocumentationImage to DocumentationImageResponse
     private DocumentationImageResponse convertToDocumentationImageResponse(DocumentationImage image) {
-        List<String> links = Arrays.asList(image.getLink().split("\\s*,\\s*"));
-
         return DocumentationImageResponse.builder()
-                .id(image.getId())  // Assuming DocumentationImage has an 'id' field
-                .links(links)  // Set the list of links (URLs)
-                .scheduleId(image.getSchedule().getId())  // Assuming DocumentationImageResponse needs 'scheduleId'
+                .id(image.getId())
+                .link(image.getLink())
+                .scheduleId(image.getSchedule().getId())
                 .build();
     }
+
 }

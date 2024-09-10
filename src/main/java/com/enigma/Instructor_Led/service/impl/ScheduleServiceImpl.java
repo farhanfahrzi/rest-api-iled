@@ -51,6 +51,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Trainer ID and Programming Language ID doesn't match");
         }
 
+
         // Create schedule from request
         Schedule schedule = Schedule.builder()
                 .date(request.getDate())
@@ -233,6 +234,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                         doc -> DocumentationImageResponse.builder()
                                 .id(doc.getId())
                                 .link(doc.getLink())
+                                .scheduleId(doc.getSchedule().getId())
                                 .build()
                 ).toList())
                 .build();

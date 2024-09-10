@@ -54,6 +54,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         attendanceDetailService.createBulk(attendanceDetails);
         attendance.setAttendanceDetails(attendanceDetails);
 
+        // Re-fetch schedule to include full information (including documentationImages)
+        Schedule scheduleWithDetails = scheduleService.getById(attendanceRequest.getScheduleId());
+
         // Membuat response untuk AttendanceDetail
         List<AttendanceDetailResponse> attendanceDetailResponse = attendanceDetails.stream()
                 .map(detail -> {
@@ -68,12 +71,14 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .id(attendance.getSchedule().getId())
                 .date(attendance.getSchedule().getDate())
                 .topic(attendance.getSchedule().getTopic())
+                .linkSchedule(attendance.getSchedule().getLink())
                 .trainerId(attendance.getSchedule().getTrainer().getId())
                 .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage().getId())
                 .documentationImages(attendance.getSchedule().getDocumentationImages().stream().map(
                                 doc -> DocumentationImageResponse.builder()
                                         .id(doc.getId())
                                         .link(doc.getLink())
+                                        .scheduleId(doc.getSchedule().getId())
                                         .build())
                         .toList())
                 .build();
@@ -105,12 +110,14 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .date(attendance.getSchedule().getDate())
                     .topic(attendance.getSchedule().getTopic())
                     .trainerId(attendance.getSchedule().getTrainer().getId())
+                    .linkSchedule(attendance.getSchedule().getLink())
                     .programmingLanguageId(attendance.getSchedule().getProgrammingLanguage()!= null ?
                             attendance.getSchedule().getProgrammingLanguage().getId() : null)
                     .documentationImages(attendance.getSchedule().getDocumentationImages().stream().map(
                                     doc -> DocumentationImageResponse.builder()
                                             .id(doc.getId())
                                             .link(doc.getLink())
+                                            .scheduleId(doc.getSchedule().getId())
                                             .build())
                             .toList())
                     .build();
