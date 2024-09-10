@@ -44,7 +44,7 @@ public class DocumentationImageServiceImpl implements DocumentationImageService 
 
     public DocumentationImageServiceImpl(DocumentationImageRepository documentationImageRepository,
                                          ScheduleService scheduleService,
-                                         @Value("${imagekit.private.key}") String privateKey,
+                                         @Value("${PrivateKey}") String privateKey,
                                          @Value("${imagekit.url.endpoint}")String uploadEndpoint,
                                          WebClient webClient) {
         this.documentationImageRepository = documentationImageRepository;

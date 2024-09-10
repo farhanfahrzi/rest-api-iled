@@ -23,8 +23,12 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String>, Jpa
 //            "JOIN m_trainee t ON t.programming_language_id = pl.id " +
 //            "WHERE t.id = :id", nativeQuery = true)
    // List<Schedule> findAllByTraineeId(String id);
-    @Query("SELECT s FROM Schedule s JOIN s.questions q WHERE q.trainee.id = :traineeId " +
-            "AND s.programmingLanguage.id = :programmingLanguageId")
+    @Query(value = "SELECT s.* FROM t_schedule s " +
+            "JOIN t_programming_language pl ON pl.id = s.programming_language_id " +
+            "JOIN m_trainee t ON t.programming_language_id = pl.id " +
+            "WHERE t.id = :traineeId " +
+            "AND pl.id = :programmingLanguageId",
+            nativeQuery = true)
     Page<Schedule> findAllByTraineeIdAndProgrammingLanguageId(Pageable pageable, @Param("traineeId") String traineeId, @Param("programmingLanguageId") String programmingLanguageId);
 
 //    @Query(value = "SELECT s.* FROM t_schedule s " +
