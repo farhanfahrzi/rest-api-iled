@@ -10,6 +10,8 @@ public interface QuestionService {
     QuestionResponse create(CreateQuestionRequest createQuestionRequest);
     QuestionResponse answerQuestions(CreateAnswerRequest answerRequest);
     QuestionResponse getById(String id);
-    List<QuestionResponse> getAll();
+//    List<QuestionResponse> getAll();
+    List<QuestionResponse> getAllByTraineeId();
+    List<QuestionResponse> getAllByTrainerId();
     void delete(String id);
 }

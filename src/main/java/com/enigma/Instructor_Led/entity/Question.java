@@ -1,6 +1,7 @@
 package com.enigma.Instructor_Led.entity;
 
 import com.enigma.Instructor_Led.constant.ConstantTable;
+import com.enigma.Instructor_Led.constant.QuestionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +24,9 @@ public class Question {
     @Column(name = "answer")
     private String answer;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = true)
+    private QuestionStatus status;
 
     @ManyToOne
     @JoinColumn(name = "trainee_id", nullable = false)
