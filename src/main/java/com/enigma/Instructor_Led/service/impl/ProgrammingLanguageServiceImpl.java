@@ -52,13 +52,12 @@ public class ProgrammingLanguageServiceImpl  implements ProgrammingLanguageServi
     public ProgrammingLanguageResponse getById(String id) {
         Optional<ProgrammingLanguage> optionalProgrammingLanguage = programmingLanguageRepository.findById(id);
 
-        if (optionalProgrammingLanguage.isPresent()) {
-            return mapToResponse(optionalProgrammingLanguage.get());
-        } else {
-            return null;
-        }
+        return optionalProgrammingLanguage.map(this::mapToResponse).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Programming language not found")
+        );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ProgrammingLanguage getOneById(String id) {
       return programmingLanguageRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Programming Language not found"));
