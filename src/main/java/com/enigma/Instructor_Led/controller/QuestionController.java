@@ -79,7 +79,20 @@ public class QuestionController {
         List<QuestionResponse> questions = questionService.getAllByTrainerId();
         CommonResponse<List<QuestionResponse>> responses = CommonResponse.<List<QuestionResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message("Questions get all successfuly")
+                .message("Questions get all successfully")
+                .data(questions)
+                .build();
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<QuestionResponse>>> getAllQuestionsStatus(
+            @RequestParam(name = "status") String status
+    ) {
+        List<QuestionResponse> questions = questionService.getAllByStatus(status);
+        CommonResponse<List<QuestionResponse>> responses = CommonResponse.<List<QuestionResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Questions get all successfully")
                 .data(questions)
                 .build();
         return new ResponseEntity<>(responses, HttpStatus.OK);

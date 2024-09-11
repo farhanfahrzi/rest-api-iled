@@ -127,6 +127,14 @@ public class QuestionServiceImpl implements QuestionService {
         return questions.stream().map(this::mapToResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<QuestionResponse> getAllByStatus(String status) {
+        QuestionStatus questionStatus = QuestionStatus.valueOf(status);
+        List<Question> questions = questionRepository.findByStatus(questionStatus);
+        return questions.stream().map(this::mapToResponse).toList();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void delete(String id) {

@@ -1,8 +1,10 @@
 package com.enigma.Instructor_Led.repository;
 
+import com.enigma.Instructor_Led.constant.QuestionStatus;
 import com.enigma.Instructor_Led.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +18,6 @@ public interface QuestionRepository extends JpaRepository<Question, String> {
             "WHERE s.trainer_id = :trainerId",
             nativeQuery = true)
     List<Question> findByTrainerId(String trainerId);
+
+    List<Question> findByStatus(QuestionStatus status);
 }

@@ -1,5 +1,6 @@
 package com.enigma.Instructor_Led.service;
 
+import com.enigma.Instructor_Led.constant.QuestionStatus;
 import com.enigma.Instructor_Led.dto.request.CreateAnswerRequest;
 import com.enigma.Instructor_Led.dto.request.CreateQuestionRequest;
 import com.enigma.Instructor_Led.dto.response.QuestionResponse;
@@ -13,5 +14,6 @@ public interface QuestionService {
 //    List<QuestionResponse> getAll();
     List<QuestionResponse> getAllByTraineeId();
     List<QuestionResponse> getAllByTrainerId();
+    List<QuestionResponse> getAllByStatus(String status);
     void delete(String id);
 }
