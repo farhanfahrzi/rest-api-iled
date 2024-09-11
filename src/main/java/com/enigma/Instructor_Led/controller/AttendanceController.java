@@ -35,6 +35,7 @@ public class AttendanceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping
     public List<AttendanceResponse> getAllAttendance(){
         return attendanceService.getAll();

@@ -33,7 +33,7 @@ public class QuestionController {
                 .body(commonResponse);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_TRAINER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_TRAINER')")
     @PostMapping("/answer")
     public ResponseEntity<CommonResponse <QuestionResponse>> answerQuestion(@RequestBody CreateAnswerRequest request) {
         QuestionResponse response = questionService.answerQuestions(request);
@@ -47,7 +47,7 @@ public class QuestionController {
                 .body(commonResponse);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_TRAINER', 'ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_TRAINER', 'ROLE_TRAINEE', 'ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse <QuestionResponse>> getQuestionById(@PathVariable String id) {
         QuestionResponse response = questionService.getById(id);
@@ -85,7 +85,7 @@ public class QuestionController {
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<Void>> deleteQuestion(@PathVariable String id) {
         questionService.delete(id);

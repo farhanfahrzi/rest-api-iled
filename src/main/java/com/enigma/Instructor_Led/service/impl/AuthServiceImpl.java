@@ -38,9 +38,9 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final Validation validation;
 
-    @Value("${iled.admin.username}")
+    @Value("${iled.superadmin.username}")
     private String adminUsername;
-    @Value("${iled.admin.password}")
+    @Value("${iled.superadmin.password}")
     private String adminPassword;
 
     @Transactional(rollbackFor = Exception.class)
@@ -52,11 +52,12 @@ public class AuthServiceImpl implements AuthService {
         Role trainee = roleService.getOrSave(UserRole.ROLE_TRAINEE);
         Role admin = roleService.getOrSave(UserRole.ROLE_ADMIN);
         Role trainer = roleService.getOrSave(UserRole.ROLE_TRAINER);
+        Role superAdmin = roleService.getOrSave(UserRole.ROLE_SUPER_ADMIN);
 
         UserAccount account = UserAccount.builder()
                 .username(adminUsername)
                 .password(passwordEncoder.encode(adminPassword))
-                .roles(List.of(admin, trainee, trainer))
+                .roles(List.of(superAdmin, admin, trainer, trainee))
                 .isEnable(true)
                 .build();
         userAccountRepository.save(account);

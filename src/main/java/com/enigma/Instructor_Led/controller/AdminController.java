@@ -25,7 +25,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<AdminResponse>> createAdmin(@RequestBody CreateAdminRequest createAdminRequest) {
         AdminResponse adminResponse = adminService.create(createAdminRequest);
@@ -61,7 +61,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<AdminResponse>>> getAllAdmins(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -89,7 +89,7 @@ public class AdminController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<Void>> deleteAdmin(@PathVariable String id) {
         adminService.delete(id);

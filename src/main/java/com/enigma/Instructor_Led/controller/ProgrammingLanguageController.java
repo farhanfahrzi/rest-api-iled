@@ -22,7 +22,7 @@ public class ProgrammingLanguageController {
 
     private final ProgrammingLanguageService programmingLanguageService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<ProgrammingLanguageResponse>> createProgrammingLanguage(
             @RequestBody CreateProgrammingLanguageRequest createRequest) {
@@ -35,7 +35,7 @@ public class ProgrammingLanguageController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<ProgrammingLanguageResponse>> getProgrammingLanguageById(@PathVariable String id) {
        ProgrammingLanguageResponse programmingLanguageResponse = programmingLanguageService.getById(id);
@@ -47,7 +47,7 @@ public class ProgrammingLanguageController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProgrammingLanguageResponse>>> getAllProgrammingLanguages(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -74,7 +74,7 @@ public class ProgrammingLanguageController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<?>> deleteProgrammingLanguage(@PathVariable String id) {
         programmingLanguageService.delete(id);

@@ -24,7 +24,7 @@ public class TrainerController {
 
     private final TrainerService trainerService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<TrainerResponse>> createTrainer(@RequestBody CreateTrainerRequest createTrainerRequest) {
         TrainerResponse trainerResponse = trainerService.create(createTrainerRequest);
@@ -36,7 +36,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
+    @PreAuthorize("hasRole('ROLE_TRAINER')")
     @PutMapping
     public ResponseEntity<CommonResponse<TrainerResponse>> updateTrainer(@RequestBody UpdateTrainerRequest updateTrainerRequest) {
         TrainerResponse trainerResponse = trainerService.update(updateTrainerRequest);
@@ -48,7 +48,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINER')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_TRAINER')")
     @GetMapping("/{id}")
     public ResponseEntity<CommonResponse<TrainerResponse>> getTrainerById(@PathVariable String id) {
         TrainerResponse trainerResponse = trainerService.getById(id);
@@ -60,7 +60,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<TrainerResponse>>> getAllTrainers(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -91,7 +91,7 @@ public class TrainerController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<CommonResponse<?>> deleteTrainer(@PathVariable String id) {
         trainerService.delete(id);

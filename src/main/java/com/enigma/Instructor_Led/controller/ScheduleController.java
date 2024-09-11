@@ -37,6 +37,7 @@ public class ScheduleController {
     private final ImageKitService imageKitService;
 
     // untuk upload image leata documentasiimage
+    @PreAuthorize("hasRole('ROLE_TRAINER')")
     @PostMapping("/{id}/upload-images")
     public ResponseEntity<CommonResponse<List<DocumentationImageResponse>>> uploadImages(
             @PathVariable String id,
@@ -71,7 +72,7 @@ public class ScheduleController {
 
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CommonResponse<ScheduleResponse>> createSchedule(
             @RequestBody CreateScheduleRequest request
@@ -86,7 +87,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @PutMapping
     public ResponseEntity<CommonResponse<ScheduleResponse>> updateSchedule(
             @RequestBody UpdateScheduleRequest request
@@ -137,7 +138,7 @@ public class ScheduleController {
 //        return new ResponseEntity<>(response, HttpStatus.OK);
 //    }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping(path = "/{id}")
     public ResponseEntity<CommonResponse<ScheduleResponse>> getById(
             @PathVariable("id") String id
@@ -159,7 +160,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ScheduleResponse>>> getAllSchedules(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
@@ -254,6 +255,7 @@ public class ScheduleController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<CommonResponse<?>> deleteSchedule(
             @PathVariable String id
